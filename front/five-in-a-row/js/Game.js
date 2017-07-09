@@ -7,8 +7,9 @@
 
     this.start = function () {
         this.chessBoard = new ChessBoard();
-        this.chessBoard.init();
-        this.chessBoard.start();
+        this.chessBoard.changeState(chessBoardStates.initStates);
+        chessBoardStates.startStates.color = ChessPieces.black;
+        this.chessBoard.changeState(chessBoardStates.startStates);
     };
 
     this.start();

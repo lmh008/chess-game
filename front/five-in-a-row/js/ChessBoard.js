@@ -15,14 +15,8 @@ function ChessBoard(callBack) {
     this.chessPiecesFactory = new ChessPiecesFactory();
     this.lastChessPicePoint = null;
     this.boardImgData = null;
-    this.state = null;
-    this.callBack = callBack;
-
-    this.init = function () {
-        this.initElement();
-        this.drawBoard();
-        this.boardImgData = this.boardCtx.getImageData(0, 0, this.boardCanvas.width, this.boardCanvas.height); //保存棋盘图片
-    };
+    this.currentState = null;
+    this.color = null;
 
     this.start = function () {
         this.bindEvent();
@@ -36,31 +30,6 @@ function ChessBoard(callBack) {
             flashCount++;
         };
         draw();
-    };
-
-    this.bindEvent = function () {
-        var currentPoint = null;
-        this.boardCanvas.onmousemove = function (event) {
-            var point = _this.checkPointIegal(event.offsetX, event.offsetY);
-            if (point && !_this.chesses[point.x][point.y]) {
-                currentPoint = point;
-                _this.boardCanvas.style.cursor = 'pointer';
-            } else {
-                currentPoint = null;
-                _this.boardCanvas.style.cursor = 'default';
-            }
-        };
-        this.boardCanvas.onclick = function () {
-            if (currentPoint) {
-                _this.chesses[currentPoint.x][currentPoint.y] = 1;
-                _this.lastChessPicePoint = currentPoint;
-                if (_this.callBack && typeof _this.callBack === 'function') {
-                    _this.callBack.call(this, currentPoint);
-                }
-                _this.drawPieces(true);
-                flashCount = 0;
-            }
-        }
     };
 
     this.initElement = function () {
@@ -86,6 +55,7 @@ function ChessBoard(callBack) {
         this.boardCtx.fillRect(0, 0, this.boardCanvas.width, this.boardCanvas.height);
         this.drawLine();
         this.drawSpecialPoint();
+        this.boardImgData = this.boardCtx.getImageData(0, 0, this.boardCanvas.width, this.boardCanvas.height); //保存棋盘图片
     };
 
     this.drawLine = function () {
@@ -168,13 +138,17 @@ function ChessBoard(callBack) {
         }
     };
 
+    this.changeState = function (state) {
+        if (state && 'doState' in state && typeof state.doState === 'function') {
+            state.doState(this);
+        }
+    };
+
     return {
         constructor: ChessBoard,
-        init: function () {
-            return _this.init.apply(_this, arguments);
-        },
-        start: function () {
-            return _this.start.apply(_this, arguments);
+        changeState: function (state) {
+            _this.currentState = state;
+            return _this.changeState.apply(_this, arguments);
         },
         accept: function (visitor) {
             visitor && 'visitChessBoard' in visitor && typeof visitor.visitChessBoard === 'function' && visitor.visitChessBoard(_this);
