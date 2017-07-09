@@ -1,9 +1,11 @@
 /**
  * Created by Administrator on 2017/7/9.
+ * 使用状态设计模式控制棋盘状态
+ * 棋盘的行为根据状态变化而变化
  */
 
 var InitState = function () {
-
+    this.name = 'init';
     this.doState = function (chessBoard) {
         chessBoard.initElement();
         chessBoard.drawBoard();
@@ -13,15 +15,16 @@ var InitState = function () {
 
 var StartStates = function () {
 
+    this.name = 'start';
     this.color = null;
     this.doState = function (chessBoard) {
         chessBoard.color = this.color;
         var flashCount = 0;
         var draw = function () {
-            chessBoard.reset();
+            chessBoard.drawBoard();
             chessBoard.drawPieces(flashCount % 2 === 0);   //使得最后一个棋子闪烁
             setTimeout(function () {
-                draw();
+                chessBoard.currentState !== chessBoardStates.stopStates.name && draw();
             }, 400);
             flashCount >= 1000 && (flashCount = 0);
             flashCount++;
@@ -33,10 +36,9 @@ var StartStates = function () {
 
 var WaitStates = function () {
 
+    this.name = 'wait';
     this.doState = function (chessBoard) {
-        chessBoard.boardCanvas.onclick = null;
-        chessBoard.boardCanvas.onmousemove = null;
-        chessBoard.boardCanvas.style.cursor = 'default';
+        chessBoard.unBindEvent();
     }
 };
 
@@ -44,46 +46,27 @@ var PlayStates = function () {
 
     var _this = this;
     var flashCount = 0;
-    this.chessBoard = null;
     this.callBack = null;
+    this.name = 'play';
 
     this.doState = function (chessBoard) {
-        this.chessBoard = chessBoard;
-        this.bindEvent(chessBoard);
-    };
-
-    this.bindEvent = function (chessBoard) {
-        var currentPoint = null;
-        chessBoard.boardCanvas.onmousemove = function (event) {
-            var point = chessBoard.checkPointIegal(event.offsetX, event.offsetY);
-            if (point && !chessBoard.chesses[point.x][point.y]) {
-                currentPoint = point;
-                chessBoard.boardCanvas.style.cursor = 'pointer';
-            } else {
-                currentPoint = null;
-                chessBoard.boardCanvas.style.cursor = 'default';
+        chessBoard.callBack = function (currentPoint) {
+            if (_this.callBack && typeof _this.callBack === 'function') {
+                _this.callBack.call(this, currentPoint);
             }
         };
-        chessBoard.boardCanvas.onclick = function () {
-            if (currentPoint) {
-                chessBoard.chesses[currentPoint.x][currentPoint.y] = chessBoard.color;
-                chessBoard.lastChessPicePoint = currentPoint;
-                if (_this.callBack && typeof _this.callBack === 'function') {
-                    _this.callBack.call(this, currentPoint, _this.chesses[currentPoint.x][currentPoint.y]);
-                }
-                chessBoard.drawPieces(true);
-                chessBoard.changeState(chessBoardStates.waitStates);
-            }
-        }
+        chessBoard.changeState(chessBoardStates.waitStates);
+        chessBoard.bindEvent();
     };
+};
 
-    return {
-        setCallBack: function (fn) {
-            _this.callBack = fn;
-        },
-        doState: function () {
-            _this.doState.apply(_this, arguments);
-        }
+var StopStates = function () {
+
+    this.name = 'stop';
+    this.doState = function (chessBoard) {
+        alert("stop");
+        chessBoard.unBindEvent();
+        chessBoard.reset();
     }
 };
 
@@ -91,6 +74,7 @@ var chessBoardStates = {
     initStates: new InitState(),
     startStates: new StartStates(),
     waitStates: new WaitStates(),
-    playStates: new PlayStates()
+    playStates: new PlayStates(),
+    stopStates: new StopStates()
 };
 

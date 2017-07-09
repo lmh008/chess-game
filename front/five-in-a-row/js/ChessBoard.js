@@ -17,27 +17,10 @@ function ChessBoard(callBack) {
     this.boardImgData = null;
     this.currentState = null;
     this.color = null;
-
-    this.start = function () {
-        this.bindEvent();
-        var draw = function () {
-            _this.reset();
-            _this.drawPieces(flashCount % 2 === 0);   //使得最后一个棋子闪烁
-            setTimeout(function () {
-                draw();
-            }, 400);
-            flashCount >= 1000 && (flashCount = 0);
-            flashCount++;
-        };
-        draw();
-    };
+    this.callBack = null;
 
     this.initElement = function () {
-        var arrayLength = this.lengthOfSide / this.gap + 1;
-        this.chesses = new Array(arrayLength);
-        for (var i = 0; i < arrayLength; i++) {
-            this.chesses[i] = new Array(arrayLength);
-        }
+        this.initChesses();
         this.container = document.getElementById('div_chess_board');
         this.boardCanvas = document.createElement('canvas');
         this.boardCanvas.width = this.lengthOfSide + this.margin * 2;
@@ -47,15 +30,58 @@ function ChessBoard(callBack) {
     };
 
     this.reset = function () {
-        this.boardCtx.putImageData(this.boardImgData, 0, 0);
+        this.initChesses();
+        this.drawBoard();
+    };
+
+    this.initChesses = function () {
+        var arrayLength = this.lengthOfSide / this.gap + 1;
+        this.chesses = new Array(arrayLength);
+        for (var i = 0; i < arrayLength; i++) {
+            this.chesses[i] = new Array(arrayLength);
+        }
+    };
+
+    this.bindEvent = function () {
+        var currentPoint = null;
+        this.boardCanvas.onmousemove = function (event) {
+            var point = _this.checkPointIegal(event.offsetX, event.offsetY);
+            if (point && !_this.chesses[point.x][point.y]) {
+                currentPoint = point;
+                _this.boardCanvas.style.cursor = 'pointer';
+            } else {
+                currentPoint = null;
+                _this.boardCanvas.style.cursor = 'default';
+            }
+        };
+        this.boardCanvas.onclick = function () {
+            if (currentPoint) {
+                _this.chesses[currentPoint.x][currentPoint.y] = _this.color;
+                _this.lastChessPicePoint = currentPoint;
+                if (_this.callBack && typeof _this.callBack === 'function') {
+                    _this.callBack.call(this, currentPoint);
+                }
+                _this.drawPieces(true);
+            }
+        }
+    };
+
+    this.unBindEvent = function () {
+        this.boardCanvas.onclick = null;
+        this.boardCanvas.onmousemove = null;
+        this.boardCanvas.style.cursor = 'default';
     };
 
     this.drawBoard = function () {
-        this.boardCtx.fillStyle = '#D3B39A';
-        this.boardCtx.fillRect(0, 0, this.boardCanvas.width, this.boardCanvas.height);
-        this.drawLine();
-        this.drawSpecialPoint();
-        this.boardImgData = this.boardCtx.getImageData(0, 0, this.boardCanvas.width, this.boardCanvas.height); //保存棋盘图片
+        if (this.boardImgData) {
+            this.boardCtx.putImageData(this.boardImgData, 0, 0);
+        } else {
+            this.boardCtx.fillStyle = '#D3B39A';
+            this.boardCtx.fillRect(0, 0, this.boardCanvas.width, this.boardCanvas.height);
+            this.drawLine();
+            this.drawSpecialPoint();
+            this.boardImgData = this.boardCtx.getImageData(0, 0, this.boardCanvas.width, this.boardCanvas.height); //保存棋盘图片
+        }
     };
 
     this.drawLine = function () {
@@ -147,7 +173,7 @@ function ChessBoard(callBack) {
     return {
         constructor: ChessBoard,
         changeState: function (state) {
-            _this.currentState = state;
+            _this.currentState = state.name;
             return _this.changeState.apply(_this, arguments);
         },
         accept: function (visitor) {
