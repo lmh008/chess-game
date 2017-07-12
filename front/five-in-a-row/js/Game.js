@@ -3,18 +3,41 @@
  */
 (function Game() {
 
-    this.chessBoard = null;
+    var chessBoard = null;
     var _this = this;
+    var socket = null;
 
-    this.start = function () {
-        this.chessBoard = new ChessBoard();
-        this.chessBoard.changeState(chessBoardStates.initStates);
-        chessBoardStates.startStates.color = ChessPieces.black;
-        this.chessBoard.changeState(chessBoardStates.startStates);
-        setTimeout(function () {
-            _this.chessBoard.changeState(chessBoardStates.stopStates);
-        }, 30000);
+    function init() {
+
+    }
+
+    var start = function () {
+        socket = new WebSocket("ws://localhost:8080/five");
+        socket.onopen = function () {
+            init();
+        };
+        socket.onclose = function () {
+            alert("lost connect!");
+        }
+        /*chessBoard = new ChessBoard();
+         chessBoard.changeState(chessBoardStates.initStates);
+         chessBoardStates.startStates.color = ChessPieces.black;
+         chessBoard.changeState(chessBoardStates.startStates);
+         setTimeout(function () {
+         chessBoard.changeState(chessBoardStates.stopStates);
+         }, 30000);*/
     };
 
-    this.start();
+    var init = function () {
+        socket.send(JSON.stringify({
+            type: 'SET_NAME',
+            data: 'zhangsan'
+        }));
+
+        socket.onmessage = function (msg) {
+            console.log(msg);
+        }
+    };
+
+    start();
 })();
