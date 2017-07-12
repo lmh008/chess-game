@@ -1,4 +1,4 @@
-package com.github.service.observer;
+package com.github.observer;
 
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;

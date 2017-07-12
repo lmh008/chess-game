@@ -1,7 +1,7 @@
 package com.github.configuration;
 
 import com.github.controller.websocket.HandshakeInterceptor;
-import com.github.controller.websocket.SocketHandler;
+import com.github.controller.websocket.handler.SocketHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -39,6 +39,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Bean
     public WebSocketHandler socketHandler() {
+        SocketHandler socketHandler = new SocketHandler();
         return new SocketHandler();
     }
 }

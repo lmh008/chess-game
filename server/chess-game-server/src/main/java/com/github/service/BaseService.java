@@ -6,5 +6,5 @@ package com.github.service;
  * Time 2017/7/12.
  * Version v1.0
  */
-public class BaseService {
+public interface BaseService {
 }

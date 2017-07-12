@@ -6,5 +6,7 @@ package com.github.entity;
  * Time 2017/7/12.
  * Version v1.0
  */
-public class Constant {
+public class Constants {
+
+    public static final String BASE = "BASE";
 }

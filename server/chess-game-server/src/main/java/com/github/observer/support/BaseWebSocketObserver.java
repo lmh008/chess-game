@@ -1,7 +1,7 @@
-package com.github.service.observer.impl;
+package com.github.observer.support;
 
 import com.github.entity.Constants;
-import com.github.service.observer.MessageObserverTemplate;
+import com.github.observer.MessageObserverTemplate;
 import com.github.entity.Message;
 
 /**
@@ -15,7 +15,7 @@ public class BaseWebSocketObserver extends MessageObserverTemplate {
     @Override
     public void respondMessage(Message message) {
         if (Constants.BASE.equals(message.getTopic())) {
-            
+
         }
     }
 

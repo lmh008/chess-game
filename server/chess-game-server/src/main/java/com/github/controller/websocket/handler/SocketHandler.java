@@ -1,9 +1,12 @@
-package com.github.controller.websocket;
+package com.github.controller.websocket.handler;
 
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+
+import java.util.List;
+import java.util.Observer;
 
 /**
  * Title
@@ -16,6 +19,8 @@ public class SocketHandler extends TextWebSocketHandler {
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         System.out.println(message);
+        TextMessage textMessage = new TextMessage("hello");
+        session.sendMessage(textMessage);
         super.handleTextMessage(session, message);
     }
 

@@ -1,4 +1,4 @@
-package com.github.service.observer;
+package com.github.observer;
 
 import com.alibaba.fastjson.JSON;
 import com.github.entity.Message;

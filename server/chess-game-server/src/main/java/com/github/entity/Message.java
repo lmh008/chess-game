@@ -1,4 +1,4 @@
-package com.github.vo;
+package com.github.entity;
 
 /**
  * Title
