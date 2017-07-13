@@ -3,10 +3,10 @@ package com.github.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -40,7 +40,9 @@ public class ApplicationContext {
     public static void removePlayer(WebSocketSession session) {
         String name = (String) session.getAttributes().get("name");
         allOnlinePlayer.remove(session.getId());
-        effectivePlayer.remove(name);
+        if (StringUtils.hasText(name)) {
+            effectivePlayer.remove(name);
+        }
     }
 
     public static void removePlayer(String name) {

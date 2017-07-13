@@ -1,5 +1,8 @@
 package com.github.service;
 
+import com.github.entity.Message;
+import org.springframework.web.socket.WebSocketSession;
+
 /**
  * Title
  * Author jirenhe@wanshifu.com
@@ -7,4 +10,7 @@ package com.github.service;
  * Version v1.0
  */
 public interface BaseService {
+
+    void setName(WebSocketSession webSocketSession, Message message);
+
 }

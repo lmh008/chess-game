@@ -30,7 +30,8 @@
 
     var init = function () {
         socket.send(JSON.stringify({
-            msgType: 'SET_NAME',
+            topic: 'base',
+            command: 'setName',
             data: 'zhangsan'
         }));
 

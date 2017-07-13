@@ -2,6 +2,7 @@ package com.github.configuration;
 
 import com.github.controller.websocket.HandshakeInterceptor;
 import com.github.controller.websocket.handler.SocketHandler;
+import com.github.observer.WebSocketObserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +13,8 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory;
 import org.springframework.web.socket.server.standard.ServerEndpointExporter;
+
+import javax.annotation.Resource;
 
 /**
  * Title
@@ -25,6 +28,9 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Autowired
     private WebSocketHandlerDecoratorFactory webSocketHandlerDecoratorFactory;
+
+    @Resource(name = "baseWebSocketObserver")
+    private WebSocketObserver baseWebSocketObserver;
 
     @Bean
     public ServerEndpointExporter serverEndpointExporter(ApplicationContext context) {
@@ -40,6 +46,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     @Bean
     public WebSocketHandler socketHandler() {
         SocketHandler socketHandler = new SocketHandler();
-        return new SocketHandler();
+        socketHandler.addObserver(baseWebSocketObserver);
+        return socketHandler;
     }
 }
