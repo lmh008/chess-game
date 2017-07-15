@@ -15,8 +15,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class ApplicationStarter {
 
     public static void main(String[] args) {
-        SpringApplication springApplication = new SpringApplication();
+        SpringApplication springApplication = new SpringApplication(ApplicationStarter.class);
         springApplication.addListeners(new ApplicationReadyListener());
-        SpringApplication.run(ApplicationStarter.class, args);
+        springApplication.run(args);
     }
 }

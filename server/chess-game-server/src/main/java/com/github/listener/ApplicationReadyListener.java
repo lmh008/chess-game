@@ -17,13 +17,8 @@ public class ApplicationReadyListener implements ApplicationListener<Application
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
-        event.getApplicationContext().getBeanFactory().registerSingleton("webSocketRequestDispatch", webSocketRequestDispatch());
+        WebSocketRequestDispatch webSocketRequestDispatch = event.getApplicationContext().getBeanFactory().getBean(WebSocketRequestDispatch.class);
+        webSocketRequestDispatch.initHandlerMapping();
     }
 
-    @Bean
-    public WebSocketRequestDispatch webSocketRequestDispatch() {
-        WebSocketRequestDispatch webSocketRequestDispatch = new WebSocketRequestDispatch();
-        webSocketRequestDispatch.initHandlerMapping();
-        return webSocketRequestDispatch;
-    }
 }

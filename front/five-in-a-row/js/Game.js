@@ -32,7 +32,13 @@
         socket.send(JSON.stringify({
             topic: 'base',
             tag: 'setName',
-            data: 'zhangsan'
+            data: {
+                name: "asd",
+                f1: "aswww",
+                f2: "2",
+                f3: "2",
+                strs: ["12", 2, 3, "aw"]
+            }
         }));
 
         socket.onmessage = function (msg) {
