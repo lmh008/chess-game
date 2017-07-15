@@ -1,7 +1,5 @@
 package com.github.observer;
 
-import com.github.entity.Message;
-import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 /**
@@ -11,8 +9,6 @@ import org.springframework.web.socket.WebSocketSession;
  * Version v1.0
  */
 public interface WebSocketObserver {
-
-    void respondMessage(WebSocketSession session, Message message) throws Exception;
 
     void respondConnectionEstablished(WebSocketSession session);
 

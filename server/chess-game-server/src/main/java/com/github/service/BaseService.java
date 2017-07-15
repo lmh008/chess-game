@@ -1,6 +1,5 @@
 package com.github.service;
 
-import com.github.entity.Message;
 import org.springframework.web.socket.WebSocketSession;
 
 /**
@@ -11,6 +10,6 @@ import org.springframework.web.socket.WebSocketSession;
  */
 public interface BaseService {
 
-    void setName(WebSocketSession webSocketSession, Message message);
+    void setName(WebSocketSession webSocketSession, String message);
 
 }

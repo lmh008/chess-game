@@ -1,7 +1,7 @@
 package com.github.configuration;
 
 import com.github.controller.websocket.HandshakeInterceptor;
-import com.github.controller.websocket.handler.SocketHandler;
+import com.github.controller.websocket.SocketHandler;
 import com.github.observer.WebSocketObserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -24,7 +24,7 @@ import javax.annotation.Resource;
  */
 @Configuration
 @EnableWebSocket
-public class WebSocketConfig implements WebSocketConfigurer {
+public class ApplicationConfig implements WebSocketConfigurer {
 
     @Autowired
     private WebSocketHandlerDecoratorFactory webSocketHandlerDecoratorFactory;

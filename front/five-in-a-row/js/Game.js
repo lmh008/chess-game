@@ -31,7 +31,7 @@
     var init = function () {
         socket.send(JSON.stringify({
             topic: 'base',
-            command: 'setName',
+            tag: 'setName',
             data: 'zhangsan'
         }));
 
