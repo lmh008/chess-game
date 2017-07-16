@@ -1,7 +1,7 @@
 package com.github.controller.websocket;
 
 import com.alibaba.fastjson.JSONObject;
-import com.github.controller.WebSocketRequestDispatch;
+import com.github.controller.dispatch.WebSocketRequestDispatch;
 import com.github.observer.WebSocketObserver;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;

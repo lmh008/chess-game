@@ -1,6 +1,6 @@
 package com.github;
 
-import com.github.listener.ApplicationReadyListener;
+import com.github.configuration.ApplicationReadyListener;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

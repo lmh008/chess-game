@@ -1,11 +1,8 @@
-package com.github.listener;
+package com.github.configuration;
 
-import com.github.controller.WebSocketRequestDispatch;
+import com.github.controller.dispatch.WebSocketRequestDispatch;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.annotation.Bean;
-
-import javax.servlet.annotation.WebListener;
 
 /**
  * Title
@@ -18,7 +15,7 @@ public class ApplicationReadyListener implements ApplicationListener<Application
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
         WebSocketRequestDispatch webSocketRequestDispatch = event.getApplicationContext().getBeanFactory().getBean(WebSocketRequestDispatch.class);
-        webSocketRequestDispatch.initHandlerMapping();
+        webSocketRequestDispatch.init();
     }
 
 }

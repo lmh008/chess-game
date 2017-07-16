@@ -46,7 +46,7 @@ public class ApplicationConfig implements WebSocketConfigurer {
     @Bean
     public WebSocketHandler socketHandler() {
         SocketHandler socketHandler = new SocketHandler();
-        socketHandler.addObserver(baseWebSocketObserver);
+        socketHandler.addObserver(baseWebSocketObserver); //注册观察者
         return socketHandler;
     }
 }

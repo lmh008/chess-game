@@ -1,4 +1,4 @@
-package com.github.controller;
+package com.github.controller.dispatch;
 
 import java.lang.annotation.*;
 

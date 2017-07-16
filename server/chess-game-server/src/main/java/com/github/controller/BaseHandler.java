@@ -1,6 +1,6 @@
-package com.github.controller.handler;
+package com.github.controller;
 
-import com.github.controller.WebSocketMapping;
+import com.github.controller.dispatch.WebSocketMapping;
 import com.github.service.BaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,8 +20,7 @@ public class BaseHandler {
     private BaseService baseService;
 
     @WebSocketMapping("setName")
-    public void setName(WebSocketSession session, String name, TestObject testObject, String[] strs) {
-        System.out.println(name + "  " + testObject + "  " + strs);
+    public void setName(WebSocketSession session, String name) {
         baseService.setName(session, name);
     }
 

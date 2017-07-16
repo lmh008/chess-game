@@ -12,6 +12,7 @@ import org.springframework.web.socket.WebSocketSession;
  * Author jirenhe@wanshifu.com
  * Time 2017/7/12.
  * Version v1.0
+ * 装扮者模式
  */
 public class WebSocketHandlerDecorator implements WebSocketHandler {
 
