@@ -3,6 +3,8 @@ package com.github.entity;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.awt.*;
+
 /**
  * Title
  * Author jirenhe@wanshifu.com
@@ -31,8 +33,8 @@ public class GameInfo {
 
     public void renew() {
         chesses = new int[25][25];
-        player1.setColor(-player1.getColor());
-        player2.setColor(-player2.getColor());
+        player1.changeColor();
+        player2.changeColor();
         player1.setReady(false);
         player2.setReady(false);
     }
@@ -50,9 +52,9 @@ public class GameInfo {
     }
 
     private Player getPlayer(String id) {
-        if (player1.getSessionId().equals(id)) {
+        if (player1.getId().equals(id)) {
             return player1;
-        } else if (player2.getSessionId().equals(id)) {
+        } else if (player2.getId().equals(id)) {
             return player2;
         } else {
             return null;

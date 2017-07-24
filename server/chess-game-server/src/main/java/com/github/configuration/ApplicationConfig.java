@@ -51,12 +51,4 @@ public class ApplicationConfig implements WebSocketConfigurer {
         socketHandler.addObserver(baseWebSocketObserver); //注册观察者
         return socketHandler;
     }
-
-    @Bean
-    public TaskExecutor taskExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(5);
-        executor.setMaxPoolSize(10);
-        return executor;
-    }
 }

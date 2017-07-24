@@ -1,6 +1,9 @@
 package com.github.entity;
 
+import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
+
+import java.io.IOException;
 
 /**
  * Title
@@ -12,7 +15,7 @@ public class Player {
 
     private WebSocketSession webSocketSession;
 
-    private String sessionId;
+    private String id;
 
     private String name;
 
@@ -30,16 +33,49 @@ public class Player {
 
     public Player(WebSocketSession webSocketSession) {
         this.webSocketSession = webSocketSession;
-        this.sessionId = webSocketSession.getId();
+        this.id = webSocketSession.getId();
         this.name = (String) webSocketSession.getAttributes().get("name");
     }
 
-    public WebSocketSession getWebSocketSession() {
-        return webSocketSession;
+    public void addWinCount() {
+        this.winCount++;
     }
 
-    public String getSessionId() {
-        return sessionId;
+    public void addLossCount() {
+        this.lossCount++;
+    }
+
+    public void changeColor() {
+        this.color = -this.color;
+    }
+
+    public void sendMessage(String topic, String tag) throws IOException {
+        this.sendMessage(new Message(topic, tag));
+    }
+
+    public void sendMessage(String topic, String tag, Object data) throws IOException {
+        this.sendMessage(new Message(topic, tag, data));
+    }
+
+    public void sendMessage(Message message) throws IOException {
+        this.sendMessage(message.toTextMessage());
+    }
+
+    public void sendMessage(TextMessage textMessage) throws IOException {
+        this.webSocketSession.sendMessage(textMessage);
+    }
+
+    public void reset() {
+        this.color = Constants.COLOR_NULL;
+        this.opponent = null;
+        this.isReady = false;
+        this.lossCount = 0;
+        this.winCount = 0;
+        this.isGaming = false;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getName() {
@@ -101,7 +137,7 @@ public class Player {
     @Override
     public String toString() {
         return "Player{" +
-                "sessionId='" + sessionId + '\'' +
+                "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 ", color=" + color +
                 ", winCount=" + winCount +

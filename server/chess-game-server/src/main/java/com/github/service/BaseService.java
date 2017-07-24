@@ -1,6 +1,9 @@
 package com.github.service;
 
-import org.springframework.web.socket.WebSocketSession;
+import com.github.ApplicationContext;
+import com.github.controller.dispatch.WebSocketMapping;
+import com.github.entity.Player;
+import org.springframework.stereotype.Service;
 
 /**
  * Title
@@ -8,8 +11,17 @@ import org.springframework.web.socket.WebSocketSession;
  * Time 2017/7/12.
  * Version v1.0
  */
-public interface BaseService {
+@Service("baseService")
+@WebSocketMapping("base")
+public class BaseService {
 
-    void setName(WebSocketSession webSocketSession, String message);
+    @WebSocketMapping("setName")
+    public void setName(Player player, String name) {
+        player.setName(name);
+    }
 
+    @WebSocketMapping("startQueue")
+    public void startQueue(Player player) {
+        ApplicationContext.waitQueue.add(player);
+    }
 }

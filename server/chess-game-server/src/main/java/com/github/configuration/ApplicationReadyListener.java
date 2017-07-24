@@ -10,6 +10,11 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.util.StringUtils;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Title
@@ -31,16 +36,39 @@ public class ApplicationReadyListener implements ApplicationListener<Application
         taskExecutor.execute(() -> {
             //noinspection InfiniteLoopStatement
             while (true) {
-                if (ApplicationContext.waitQueue.size() > 2) {
+                if (ApplicationContext.waitQueue.size() >= 2) {
                     Player player1 = ApplicationContext.waitQueue.remove(0);
                     Player player2 = ApplicationContext.waitQueue.remove(0);
                     gameService.prepareGame(player1, player2);
                     logger.info("game start: 【" + player1.getName() + "】" +
                             "【" + player2.getName() + "】");
                 }
-                logger.info("player matching... current wait queue size : " + ApplicationContext.waitQueue.size());
+//                logger.info("player matching... current wait queue size : " + ApplicationContext.waitQueue.size());
                 try {
-                    Thread.sleep(50);
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        taskExecutor.execute(() -> {
+            //noinspection InfiniteLoopStatement
+            while (true) {
+                HashMap<String, Integer> data = new HashMap<>();
+                data.put("online", ApplicationContext.allOnlinePlayer.size());
+                data.put("onWait", ApplicationContext.waitQueue.size());
+                for (Map.Entry<String, Player> entry : ApplicationContext.allOnlinePlayer.entrySet()) {
+                    if (StringUtils.hasText(entry.getValue().getName())) {
+                        try {
+                            entry.getValue().sendMessage("base", "playerInfos", data);
+                        } catch (IOException e) {
+                            logger.error("send Message error! ", e);
+                        }
+                    }
+                }
+                try {
+                    Thread.sleep(5000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

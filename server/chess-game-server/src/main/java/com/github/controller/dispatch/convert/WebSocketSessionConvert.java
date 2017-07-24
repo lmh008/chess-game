@@ -1,5 +1,7 @@
 package com.github.controller.dispatch.convert;
 
+import com.github.ApplicationContext;
+import com.github.entity.Player;
 import org.springframework.web.socket.WebSocketSession;
 
 /**
@@ -12,7 +14,13 @@ public class WebSocketSessionConvert implements ParamsConvert {
 
     @Override
     public Object convertParams(DataInfo dataInfo, String parameterName, Class<?> parameterType, ParamsConvertChain convertChain) {
-        return parameterType == WebSocketSession.class ? dataInfo.getWebSocketSession() : convertChain.convertParams(dataInfo, parameterName,
-                parameterType, convertChain);
+        if (parameterType == WebSocketSession.class) {
+            return dataInfo.getWebSocketSession();
+        } else if (parameterType == Player.class) {
+            return dataInfo.getPlayer();
+        } else {
+            return convertChain.convertParams(dataInfo, parameterName,
+                    parameterType, convertChain);
+        }
     }
 }

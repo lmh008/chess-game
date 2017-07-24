@@ -6,6 +6,15 @@
 </head>
 <body>
 <div id="div_chess_board" style="text-align: center;margin-top: 100px"></div>
+<div id="div_name_input" style="text-align: center;margin-top: 100px">
+    <label>请输入你的名字</label>
+    <input type="text" id="name"/>
+    <button id="bt_confirm">确定</button>
+</div>
+<div id="wait_queue" style="text-align: center;margin-top: 100px; display: none;">
+    <label id="wait_queue_label"></label></br>
+    <button id="start_queue">开始匹配</button>
+</div>
 </body>
 <script type="text/javascript" src="js/ChessBoard.js"></script>
 <script type="text/javascript" src="js/ChessPiecesFactory.js"></script>

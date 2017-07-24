@@ -3,6 +3,7 @@ package com.github.controller.dispatch.convert;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.github.entity.Player;
 import org.springframework.web.socket.WebSocketSession;
 
 /**
@@ -18,10 +19,12 @@ public class DataInfo {
     private String dataToJsonStr;
     private Object data;
     private WebSocketSession webSocketSession;
+    private Player player;
 
-    public DataInfo(Object data, WebSocketSession session) {
+    public DataInfo(Object data, WebSocketSession session, Player player) {
         this.webSocketSession = session;
         this.data = data;
+        this.player = player;
         dataToJsonArray = null;
         dataToJsonObject = null;
         dataToJsonStr = null;
@@ -32,6 +35,10 @@ public class DataInfo {
             dataToJsonObject = (JSONObject) data;
             dataToJsonStr = JSON.toJSONString(data);
         }
+    }
+
+    public Player getPlayer() {
+        return player;
     }
 
     public JSONArray getDataToJsonArray() {

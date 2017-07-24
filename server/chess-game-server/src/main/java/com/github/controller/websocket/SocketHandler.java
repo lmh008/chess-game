@@ -3,6 +3,8 @@ package com.github.controller.websocket;
 import com.alibaba.fastjson.JSONObject;
 import com.github.controller.dispatch.WebSocketRequestDispatch;
 import com.github.observer.WebSocketObserver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -28,24 +30,25 @@ public class SocketHandler extends TextWebSocketHandler implements ApplicationCo
 
     private List<WebSocketObserver> webSocketObservers;
 
+    private final Logger logger = LoggerFactory.getLogger(SocketHandler.class);
+
     public SocketHandler() {
         this.webSocketObservers = new ArrayList<>();
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage textMessage) throws Exception {
-        System.out.println(textMessage);
         JSONObject jsonData = JSONObject.parseObject(textMessage.getPayload());
+        logger.info("receive message from " + session.getId() + " content:" + jsonData);
         String topic = jsonData.getString("topic");
         String tag = jsonData.getString("tag");
         Assert.isTrue(StringUtils.hasText(topic) && StringUtils.hasText(tag), "un support request");
         applicationContext.getBean(WebSocketRequestDispatch.class).doDispatch(session, topic, tag, jsonData.get("data"));
-        session.sendMessage(textMessage);
     }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        System.out.println(session.getId() + " connect!");
+        logger.info(session.getId() + " connect!");
         for (WebSocketObserver webSocketObserver : webSocketObservers) {
             webSocketObserver.respondConnectionEstablished(session);
         }
@@ -53,7 +56,7 @@ public class SocketHandler extends TextWebSocketHandler implements ApplicationCo
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        System.out.println(session.getId() + " closed!");
+        logger.info(session.getId() + " closed!");
         for (WebSocketObserver webSocketObserver : webSocketObservers) {
             webSocketObserver.respondConnectionClosed(session);
         }

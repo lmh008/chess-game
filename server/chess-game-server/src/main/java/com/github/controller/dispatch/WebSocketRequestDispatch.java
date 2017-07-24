@@ -117,7 +117,7 @@ public class WebSocketRequestDispatch implements ApplicationContextAware {
             Object[] params = new Object[paramTypes.length];
             Class<?> parameterClass = null;
             String parameterName = null;
-            DataInfo dataInfo = new DataInfo(data, session);
+            DataInfo dataInfo = new DataInfo(data, session, com.github.ApplicationContext.allOnlinePlayer.get(session.getId()));
             for (int i = 0; i < paramTypes.length; i++) {
                 parameterClass = paramTypes[i].getType();
                 parameterName = paramNames[i];
