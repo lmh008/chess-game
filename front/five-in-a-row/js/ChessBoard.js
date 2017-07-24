@@ -1,7 +1,7 @@
 /**
  * Created by Administrator on 2017/7/8.
  */
-function ChessBoard(callBack) {
+function ChessBoard() {
 
     var _this = this;
     var flashCount = 0;
@@ -70,6 +70,11 @@ function ChessBoard(callBack) {
         this.boardCanvas.onclick = null;
         this.boardCanvas.onmousemove = null;
         this.boardCanvas.style.cursor = 'default';
+    };
+
+    this.addOppoChess = function (point) {
+        _this.chesses[point.x][point.y] = -_this.color;
+        _this.lastChessPicePoint = point;
     };
 
     this.drawBoard = function () {

@@ -6,7 +6,9 @@
 
 var InitState = function () {
     this.name = 'init';
+    this.color = null;
     this.doState = function (chessBoard) {
+        chessBoard.color = this.color;
         chessBoard.initElement();
         chessBoard.drawBoard();
     };
@@ -16,9 +18,7 @@ var InitState = function () {
 var StartStates = function () {
 
     this.name = 'start';
-    this.color = null;
     this.doState = function (chessBoard) {
-        chessBoard.color = this.color;
         var flashCount = 0;
         var draw = function () {
             chessBoard.drawBoard();
@@ -30,7 +30,7 @@ var StartStates = function () {
             flashCount++;
         };
         draw();
-        chessBoard.changeState(this.color === ChessPieces.black ? chessBoardStates.playStates : chessBoardStates.waitStates);
+        chessBoard.changeState(chessBoard.color === ChessPieces.black ? chessBoardStates.playStates : chessBoardStates.waitStates);
     }
 };
 
@@ -42,6 +42,16 @@ var WaitStates = function () {
     }
 };
 
+var OppoUnderPawnStates = function () {
+    this.name = 'oppoUnderPawn';
+    this.point = null;
+    var _this = this;
+    this.doState = function (chessBoard) {
+        chessBoard.addOppoChess(_this.point);
+        chessBoard.changeState(chessBoardStates.playStates);
+    };
+};
+
 var PlayStates = function () {
 
     var _this = this;
@@ -50,13 +60,13 @@ var PlayStates = function () {
     this.name = 'play';
 
     this.doState = function (chessBoard) {
+        chessBoard.bindEvent();
         chessBoard.callBack = function (currentPoint) {
             if (_this.callBack && typeof _this.callBack === 'function') {
                 _this.callBack.call(this, currentPoint);
             }
+            chessBoard.changeState(chessBoardStates.waitStates);
         };
-        chessBoard.changeState(chessBoardStates.waitStates);
-        chessBoard.bindEvent();
     };
 };
 
@@ -75,6 +85,7 @@ var chessBoardStates = {
     startStates: new StartStates(),
     waitStates: new WaitStates(),
     playStates: new PlayStates(),
+    opponentStates: new OppoUnderPawnStates(),
     stopStates: new StopStates()
 };
 
