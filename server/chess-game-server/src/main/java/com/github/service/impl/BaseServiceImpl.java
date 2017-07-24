@@ -16,6 +16,6 @@ public class BaseServiceImpl implements BaseService {
 
     @Override
     public void setName(WebSocketSession webSocketSession, String name) {
-        ApplicationContext.addEffectivePlayer(name, webSocketSession);
+        ApplicationContext.allOnlinePlayer.get(webSocketSession.getId()).setName(name);
     }
 }
