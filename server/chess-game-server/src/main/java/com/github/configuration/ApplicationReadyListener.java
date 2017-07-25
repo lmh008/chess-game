@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
@@ -31,28 +30,26 @@ public class ApplicationReadyListener implements ApplicationListener<Application
         BeanFactory beanFactory = event.getApplicationContext().getBeanFactory();
         WebSocketRequestDispatch webSocketRequestDispatch = beanFactory.getBean(WebSocketRequestDispatch.class);
         webSocketRequestDispatch.init();
-        TaskExecutor taskExecutor = beanFactory.getBean(TaskExecutor.class);
         GameService gameService = beanFactory.getBean(GameService.class);
-        taskExecutor.execute(() -> {
+        new Thread(() -> {
+            logger.info("player matching... ");
             //noinspection InfiniteLoopStatement
             while (true) {
                 if (ApplicationContext.waitQueue.size() >= 2) {
                     Player player1 = ApplicationContext.waitQueue.remove(0);
                     Player player2 = ApplicationContext.waitQueue.remove(0);
                     gameService.prepareGame(player1, player2);
-                    logger.info("game start: 【" + player1.getName() + "】" +
-                            "【" + player2.getName() + "】");
+                    logger.info("player matching... current wait queue size : " + ApplicationContext.waitQueue.size());
                 }
-//                logger.info("player matching... current wait queue size : " + ApplicationContext.waitQueue.size());
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-        });
-
-        taskExecutor.execute(() -> {
+        }).start();
+        new Thread(() -> {
+            logger.info("send msg playerInfos : ----------------------");
             //noinspection InfiniteLoopStatement
             while (true) {
                 HashMap<String, Integer> data = new HashMap<>();
@@ -67,13 +64,14 @@ public class ApplicationReadyListener implements ApplicationListener<Application
                         }
                     }
                 }
+                logger.info("send msg playerInfos : " + ApplicationContext.allOnlinePlayer.size());
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-        });
+        }).start();
     }
 
 }
