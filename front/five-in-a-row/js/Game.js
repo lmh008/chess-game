@@ -19,6 +19,17 @@
         initSocket();
         intiEvent();
         chessBoard = new ChessBoard();
+        chessBoard.bindOnUnderPawn(function (point) {
+            socket.send(JSON.stringify({
+                topic: 'game',
+                tag: 'underPawn',
+                data: {
+                    x: point.x,
+                    y: point.y
+                }
+            }));
+            chessBoard.changeState(chessBoardStates.waitStates);
+        });
     };
 
     var intiEvent = function () {
@@ -54,16 +65,6 @@
         socket.onmessage = function (command) {
             var msg = JSON.parse(command.data);
             console.log(msg);
-            chessBoardStates.playStates.callBack = function (point) {
-                socket.send(JSON.stringify({
-                    topic: 'game',
-                    tag: 'underPawn',
-                    data: {
-                        x: point.x,
-                        y: point.y
-                    }
-                }));
-            };
             if (msg.topic && msg.topic == 'base') {
                 switch (msg.tag) {
                     case 'playerInfos':
@@ -74,7 +75,7 @@
             if (msg.topic && msg.topic == 'game') {
                 switch (msg.tag) {
                     case 'prepareGame':
-                        chessBoardStates.initStates.color = msg.data.color;
+                        chessBoard.changeColor(msg.data.color);
                         chessBoard.changeState(chessBoardStates.initStates);
                         socket.send(JSON.stringify({
                             topic: 'game',
@@ -85,26 +86,23 @@
                         chessBoard.changeState(chessBoardStates.startStates);
                         break;
                     case 'underPawn':
-                        chessBoardStates.opponentStates.point = {
+                        chessBoard.addOppoChess({
                             x: msg.data.x,
                             y: msg.data.y
-                        };
-                        chessBoard.changeState(chessBoardStates.opponentStates);
+                        });
+                        chessBoard.changeState(chessBoardStates.playStates);
                         break;
                     case 'win':
-                        alert("you win!");
                         chessBoard.changeState(chessBoardStates.waitStates);
+                        alert("you win!");
                         break;
                     case 'loss':
-                        chessBoardStates.opponentStates.point = {
-                            x: msg.data.x,
-                            y: msg.data.y
-                        };
-                        chessBoard.changeState(chessBoardStates.opponentStates);
                         chessBoard.changeState(chessBoardStates.waitStates);
                         alert("you loss!");
                         break;
                     case 'giveUp':
+                        chessBoard.changeState(chessBoardStates.waitStates);
+                        alert("opponent give up, you win!");
                         break;
                 }
             }

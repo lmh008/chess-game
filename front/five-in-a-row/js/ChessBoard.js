@@ -11,13 +11,13 @@ function ChessBoard() {
     this.container = null;
     this.lengthOfSide = 720;
     this.gap = 30;
-    this.margin = 10;
+    this.margin = 20;
     this.chessPiecesFactory = new ChessPiecesFactory();
     this.lastChessPicePoint = null;
     this.boardImgData = null;
     this.currentState = null;
     this.color = null;
-    this.callBack = null;
+    this.onUnderPawn = null;
 
     this.initElement = function () {
         this.initChesses();
@@ -58,8 +58,8 @@ function ChessBoard() {
             if (currentPoint) {
                 _this.chesses[currentPoint.x][currentPoint.y] = _this.color;
                 _this.lastChessPicePoint = currentPoint;
-                if (_this.callBack && typeof _this.callBack === 'function') {
-                    _this.callBack.call(this, currentPoint);
+                if (_this.onUnderPawn && typeof _this.onUnderPawn === 'function') {
+                    _this.onUnderPawn.call(this, currentPoint);
                 }
                 _this.drawPieces(true);
             }
@@ -151,8 +151,8 @@ function ChessBoard() {
     };
 
     this.checkPointIegal = function (clientX, clientY) {
-        clientX = clientX - 10;
-        clientY = clientY - 10;
+        clientX = clientX - this.margin;
+        clientY = clientY - this.margin;
         if (clientY >= 0 && clientY >= 0) {
             clientX /= this.gap;
             clientY /= this.gap;
@@ -175,8 +175,21 @@ function ChessBoard() {
         }
     };
 
+    this.changeColor = function (color) {
+        _this.color = color || -_this.color;
+    };
+
     return {
         constructor: ChessBoard,
+        bindOnUnderPawn: function (fn) {
+            _this.onUnderPawn = fn;
+        },
+        changeColor: function (color) {
+            _this.changeColor.apply(_this, arguments);
+        },
+        addOppoChess: function (point) {
+            _this.addOppoChess.apply(_this, arguments);
+        },
         changeState: function (state) {
             _this.currentState = state.name;
             return _this.changeState.apply(_this, arguments);

@@ -90,15 +90,15 @@ public class GameService implements WebSocketObserver {
         boolean winFlag = this.isWin(chesses, point);
         Player opponent = player.getOpponent();
         try {
+            opponent.sendMessage(topic, "underPawn", point);
             if (winFlag) {
                 player.addWinCount();
                 opponent.addLossCount();
                 gameInfo.renew();
                 player.sendMessage(topic, "win");
-                opponent.sendMessage(topic, "loss", point);
+                opponent.sendMessage(topic, "loss");
             } else {
                 gameInfo.setCurrentUnderPawnId(opponent.getId());
-                opponent.sendMessage(topic, "underPawn", point);
             }
         } catch (IOException e) {
             this.afterException(player, opponent, e);
@@ -152,6 +152,7 @@ public class GameService implements WebSocketObserver {
                 num = 0;
             }
         }
+        num = 0;
         for (int y = minPoint.y; y <= maxPoint.y; y++) {
             if (chesses[p.x][y] == lastColor) {
                 num++;
@@ -174,6 +175,7 @@ public class GameService implements WebSocketObserver {
             minPoint.x = minPoint.x - temp;
             minPoint.y = minPoint.y - temp;
         }
+        num = 0;
         for (int x = minPoint.x, y = minPoint.y; x <= maxPoint.x; x = ++y) {
             if (chesses[x][y] == lastColor) {
                 num++;
@@ -184,6 +186,7 @@ public class GameService implements WebSocketObserver {
                 num = 0;
             }
         }
+        num = 0;
         for (int x = minPoint.x, y = maxPoint.y; x <= maxPoint.x; x++, y--) {
             if (chesses[x][y] == lastColor) {
                 num++;

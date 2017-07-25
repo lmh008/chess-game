@@ -6,13 +6,10 @@
 
 var InitState = function () {
     this.name = 'init';
-    this.color = null;
     this.doState = function (chessBoard) {
-        chessBoard.color = this.color;
         chessBoard.initElement();
         chessBoard.drawBoard();
     };
-
 };
 
 var StartStates = function () {
@@ -42,39 +39,29 @@ var WaitStates = function () {
     }
 };
 
-var OppoUnderPawnStates = function () {
-    this.name = 'oppoUnderPawn';
-    this.point = null;
-    var _this = this;
-    this.doState = function (chessBoard) {
-        chessBoard.addOppoChess(_this.point);
-        chessBoard.changeState(chessBoardStates.playStates);
-    };
-};
-
 var PlayStates = function () {
 
     var _this = this;
-    var flashCount = 0;
-    this.callBack = null;
     this.name = 'play';
 
     this.doState = function (chessBoard) {
         chessBoard.bindEvent();
-        chessBoard.callBack = function (currentPoint) {
-            if (_this.callBack && typeof _this.callBack === 'function') {
-                _this.callBack.call(this, currentPoint);
-            }
-            chessBoard.changeState(chessBoardStates.waitStates);
-        };
     };
+};
+
+var ResetStates = function () {
+    this.name = 'reset';
+    this.doState = function (chessBoard) {
+        chessBoard.unBindEvent();
+        chessBoard.reset();
+        chessBoard.changeColor();
+    }
 };
 
 var StopStates = function () {
 
     this.name = 'stop';
     this.doState = function (chessBoard) {
-        alert("stop");
         chessBoard.unBindEvent();
         chessBoard.reset();
     }
@@ -85,7 +72,7 @@ var chessBoardStates = {
     startStates: new StartStates(),
     waitStates: new WaitStates(),
     playStates: new PlayStates(),
-    opponentStates: new OppoUnderPawnStates(),
-    stopStates: new StopStates()
+    stopStates: new StopStates(),
+    resetStates: new ResetStates()
 };
 
