@@ -7,6 +7,7 @@
     <groupId>com.github</groupId>
     <artifactId>chess-game-server</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>war</packaging>
 
     <properties>
         <java.version>1.8</java.version>
@@ -22,6 +23,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -43,5 +49,4 @@
             <scope>runtime</scope>
         </dependency>
     </dependencies>
-
 </project>

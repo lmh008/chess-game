@@ -3,6 +3,8 @@ package com.github;
 import com.github.configuration.ApplicationReadyListener;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.support.SpringBootServletInitializer;
 
 /**
  * Title
@@ -12,7 +14,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 
 @SpringBootApplication
-public class ApplicationStarter {
+public class ApplicationStarter extends SpringBootServletInitializer {
+
+    @Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+        return application.sources(ApplicationStarter.class);
+    }
 
     public static void main(String[] args) {
         SpringApplication springApplication = new SpringApplication(ApplicationStarter.class);

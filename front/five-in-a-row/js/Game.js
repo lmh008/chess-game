@@ -44,7 +44,7 @@
     };
 
     var initSocket = function () {
-        socket = new WebSocket("ws://mrj.website:8080/five");
+        socket = new WebSocket("ws://127.0.0.1:8080/five");
         socket.onopen = function () {
             console.log('socket connected!')
         };
