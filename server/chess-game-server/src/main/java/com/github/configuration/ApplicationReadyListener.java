@@ -32,7 +32,6 @@ public class ApplicationReadyListener implements ApplicationListener<Application
         webSocketRequestDispatch.init();
         GameService gameService = beanFactory.getBean(GameService.class);
         new Thread(() -> {
-            logger.info("player matching... ");
             //noinspection InfiniteLoopStatement
             while (true) {
                 if (ApplicationContext.waitQueue.size() >= 2) {
@@ -49,7 +48,6 @@ public class ApplicationReadyListener implements ApplicationListener<Application
             }
         }).start();
         new Thread(() -> {
-            logger.info("send msg playerInfos : ----------------------");
             //noinspection InfiniteLoopStatement
             while (true) {
                 HashMap<String, Integer> data = new HashMap<>();
@@ -64,7 +62,6 @@ public class ApplicationReadyListener implements ApplicationListener<Application
                         }
                     }
                 }
-                logger.info("send msg playerInfos : " + ApplicationContext.allOnlinePlayer.size());
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
