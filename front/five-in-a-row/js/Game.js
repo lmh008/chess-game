@@ -6,16 +6,16 @@
     var chessBoard = null;
     var _this = this;
     var socket = null;
-    var div_name_input = null;
-    var wait_queue = null;
-    var div_chess_board = null;
-    var wait_queue_label = null;
+    var $div_name_input = null;
+    var $div_game = null;
+    var $div_wait_queue = null;
+    var $wait_queue_label = null;
 
     var start = function () {
-        div_name_input = document.getElementById('div_name_input');
-        wait_queue = document.getElementById('wait_queue');
-        div_chess_board = document.getElementById('div_chess_board');
-        wait_queue_label = document.getElementById('wait_queue_label');
+        $div_name_input = $('#div_name_input');
+        $div_wait_queue = $('#div_wait_queue');
+        $div_game = $('#div_game');
+        $wait_queue_label = $('#wait_queue_label');
         initSocket();
         intiEvent();
         chessBoard = new ChessBoard();
@@ -30,28 +30,31 @@
             }));
             chessBoard.changeState(chessBoardStates.waitStates);
         });
+        /*$div_game.show();
+        $div_name_input.hide();
+        chessBoard.changeState(chessBoardStates.initStates);*/
     };
 
     var intiEvent = function () {
-        document.getElementById('bt_confirm').onclick = function () {
-            var nameInput = document.getElementById('name');
-            if (nameInput && nameInput.value) {
+        $('#bt_confirm').on('click', function () {
+            var nameInput = $('#name').val();
+            if (nameInput) {
                 socket.send(JSON.stringify({
                     topic: 'base',
                     tag: 'setName',
-                    data: nameInput.value
+                    data: nameInput
                 }));
-                div_name_input.style.display = 'none';
-                wait_queue.style.display = '';
+                $div_name_input.hide();
+                $div_wait_queue.show();
             }
-        };
-        document.getElementById('start_queue').onclick = function () {
+        });
+        $('#start_queue').on('click', function () {
             socket.send(JSON.stringify({
                 topic: 'base',
                 tag: 'startQueue'
             }));
-            this.style.display = 'none';
-        };
+            $(this).hide();
+        });
     };
 
     var initSocket = function () {
@@ -68,13 +71,15 @@
             if (msg.topic && msg.topic == 'base') {
                 switch (msg.tag) {
                     case 'playerInfos':
-                        wait_queue_label.innerHTML = '共' + msg.data.online + '人在线，游戏队列人数:' + msg.data.onWait;
+                        $wait_queue_label.html('共' + msg.data.online + '人在线，游戏队列人数:' + msg.data.onWait);
                         break;
                 }
             }
             if (msg.topic && msg.topic == 'game') {
                 switch (msg.tag) {
                     case 'prepareGame':
+                        $div_wait_queue.hide();
+                        $div_game.show();
                         chessBoard.changeColor(msg.data.color);
                         chessBoard.changeState(chessBoardStates.initStates);
                         socket.send(JSON.stringify({

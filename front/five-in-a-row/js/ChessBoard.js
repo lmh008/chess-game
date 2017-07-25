@@ -21,7 +21,7 @@ function ChessBoard() {
 
     this.initElement = function () {
         this.initChesses();
-        this.container = document.getElementById('div_chess_board');
+        this.container = document.getElementById('game_chess_board');
         this.boardCanvas = document.createElement('canvas');
         this.boardCanvas.width = this.lengthOfSide + this.margin * 2;
         this.boardCanvas.height = this.lengthOfSide + this.margin * 2;
