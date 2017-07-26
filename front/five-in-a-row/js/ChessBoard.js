@@ -9,9 +9,9 @@ function ChessBoard() {
     this.boardCtx = null;
     this.chesses = null;
     this.container = null;
-    this.lengthOfSide = 720;
-    this.gap = 30;
-    this.margin = 20;
+    this.lengthOfSide = null; //棋盘总宽度
+    this.gap = null;    //每一行的间隔
+    this.margin = 20;   //第一行离边界的间隔
     this.chessPiecesFactory = new ChessPiecesFactory();
     this.lastChessPicePoint = null;
     this.boardImgData = null;
@@ -22,6 +22,8 @@ function ChessBoard() {
     this.initElement = function () {
         this.initChesses();
         this.container = document.getElementById('game_chess_board');
+        this.lengthOfSide = this.container.clientWidth * 0.8;
+        this.gap = this.lengthOfSide / 24;
         this.boardCanvas = document.createElement('canvas');
         this.boardCanvas.width = this.lengthOfSide + this.margin * 2;
         this.boardCanvas.height = this.lengthOfSide + this.margin * 2;
@@ -35,10 +37,9 @@ function ChessBoard() {
     };
 
     this.initChesses = function () {
-        var arrayLength = this.lengthOfSide / this.gap + 1;
-        this.chesses = new Array(arrayLength);
-        for (var i = 0; i < arrayLength; i++) {
-            this.chesses[i] = new Array(arrayLength);
+        this.chesses = new Array(25);
+        for (var i = 0; i < 25; i++) {
+            this.chesses[i] = new Array(25);
         }
     };
 
@@ -197,6 +198,9 @@ function ChessBoard() {
         synchronized: function (boardState) {
             _this.lastChessPicePoint = boardState.lastPoint;
             _this.chesses = boardState.chesses;
+        },
+        width: function () {
+            return _this.lengthOfSide;
         },
         accept: function (visitor) {
             visitor && 'visitChessBoard' in visitor && typeof visitor.visitChessBoard === 'function' && visitor.visitChessBoard(_this);
