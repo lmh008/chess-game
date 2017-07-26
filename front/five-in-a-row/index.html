@@ -3,31 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <title>five-in-a-row</title>
+    <script type="text/javascript" src="plugins/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="js/ChessBoard.js"></script>
+    <script type="text/javascript" src="js/ChessPiecesFactory.js"></script>
+    <script type="text/javascript" src="js/ChessBoardStates.js"></script>
+    <script type="text/javascript" src="plugins/bootstrap-3.3.7/dist/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="plugins/bootstrap3-dialog/dist/js/bootstrap-dialog.min.js"></script>
+    <link href="plugins/bootstrap-3.3.7/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="plugins/bootstrap3-dialog/dist/css/bootstrap-dialog.min.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
-<div id="div_game" style="display: none;margin-top: 100px" class="row">
+<div id="div_game" style="display: none;margin-top: 50px" class="row">
     <div id="game_left" class="col-sm-3">
+        <div class="col-md-12">
+            <div class="panel panel-primary" id="div_my_info">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        我
+                    </h3>
+                </div>
+                <div class="panel-body" id="div_my_body" style="height: 78%">
+                    <canvas id="canvas_my"></canvas>
+                </div>
+                <div class="panel-footer" id="div_my_score">
+                    比分：胜1 负2
+                </div>
+            </div>
+            <div class="panel panel-primary" id="div_opponent_info">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        对手
+                    </h3>
+                </div>
+                <div class="panel-body" id="div_opponent_body" style="height: 78%">
+                    <canvas id="canvas_opponent"></canvas>
+                </div>
+                <div class="panel-footer" id="div_opponent_score">
+                    比分：胜2 负1
+                </div>
+            </div>
+        </div>
     </div>
     <div id="game_chess_board" class="col-sm-6" style="text-align: center">
     </div>
     <div id="game_right" class="col-sm-3">
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    聊天记录
+                </h3>
+            </div>
+            <div class="panel-body">
+                <textarea id="textarea_chat_info" class="form-control" readonly></textarea>
+            </div>
+            <div class="panel-footer">
+                <div class="row">
+                    <div class="col-sm-10">
+                        <input id="input_chat_content" class="form-control"/>
+                    </div>
+                    <div class="col-sm-2">
+                        <button id="bt_caht" type="button" class="btn btn-success btn-sm">发送</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-<div id="div_name_input" style="text-align: center;margin-top: 100px">
-    <label>请输入你的名字</label>
-    <input type="text" id="name"/>
-    <button id="bt_confirm" class="btn-sm">确定</button>
+<div id="div_name_input" style="margin-top: 100px" class="row">
+    <form class="form-inline" style="text-align: center">
+        <div class="form-group">
+            <label>请输入你的名字</label>
+            <input type="text" id="name" class="form-control"/>
+            <button id="bt_confirm" type="button" class="btn btn-primary btn-sm">确定</button>
+        </div>
+    </form>
 </div>
 <div id="div_wait_queue" style="text-align: center;margin-top: 100px; display: none;">
     <label id="wait_queue_label"></label></br>
-    <button id="start_queue" class="btn-sm">开始匹配</button>
+    <button id="start_queue" class="btn btn-primary btn-sm">开始匹配</button>
 </div>
-</body>
-<script type="text/javascript" src="plugins/jquery-3.2.1.min.js"></script>
-<script type="text/javascript" src="js/ChessBoard.js"></script>
-<script type="text/javascript" src="js/ChessPiecesFactory.js"></script>
-<script type="text/javascript" src="js/ChessBoardStates.js"></script>
 <script type="text/javascript" src="js/Game.js"></script>
-<script type="text/javascript" src="plugins/bootstrap-3.3.7/dist/js/bootstrap.min.js"></script>
-<link rel="stylesheet" href="plugins/bootstrap-3.3.7/dist/css/bootstrap.min.css">
+</body>
 </html>

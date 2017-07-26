@@ -13,9 +13,9 @@ import java.awt.*;
  */
 public class GameInfo {
 
-    private BoardState boardState;
+    private BoardState boardState = new BoardState();
 
-    private BoardState boardStateBack;
+    private BoardState boardStateBack = new BoardState();
 
     private Player player1;
 

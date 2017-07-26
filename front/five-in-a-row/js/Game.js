@@ -26,9 +26,34 @@
             }));
             chessBoard.changeState(chessBoardStates.waitStates);
         });
-        /*$div_game.show();
+        $div_game.show();
         $div_name_input.hide();
-        chessBoard.changeState(chessBoardStates.initStates);*/
+        chessBoard.changeState(chessBoardStates.initStates);
+        $("#textarea_chat_info").height(chessBoard.width() - 100);
+        var $div_my_info = $("#div_my_info");
+        var $div_opponent_info = $("#div_opponent_info");
+        $div_my_info.height(chessBoard.width() / 2);
+        $div_opponent_info.height(chessBoard.width() / 2);
+        var canvas_my = $("#canvas_my").get(0);
+        var canvas_opponent = $("#canvas_opponent").get(0);
+        canvas_my.width = $div_my_info.find(".panel-body").width();
+        canvas_my.height = $div_my_info.find(".panel-body").height();
+        canvas_opponent.width = $div_opponent_info.find(".panel-body").width();
+        canvas_opponent.height = $div_opponent_info.find(".panel-body").height();
+        var r = canvas_my.height >= canvas_my.width ? canvas_my.width / 2 - 20 : canvas_my.height / 2 - 20;
+        var myCanvasContext = canvas_my.getContext("2d");
+        myCanvasContext.beginPath();
+        myCanvasContext.fillStyle = 'black';
+        myCanvasContext.arc(canvas_my.width / 2, canvas_my.height / 2, r, 0, 2 * Math.PI);
+        myCanvasContext.fill();
+        myCanvasContext.closePath();
+        var opponentCanvasContext = canvas_opponent.getContext("2d");
+        opponentCanvasContext.beginPath();
+        opponentCanvasContext.fillStyle = 'black';
+        opponentCanvasContext.arc(canvas_opponent.width / 2, canvas_opponent.height / 2, r, 0, 2 * Math.PI);
+        opponentCanvasContext.fill();
+        opponentCanvasContext.closePath();
+
     };
 
     var intiEvent = function () {
@@ -43,6 +68,8 @@
                 }));
                 $div_name_input.hide();
                 $div_wait_queue.show();
+            } else {
+                BootstrapDialog.show({message: '请输入一个名字！'});
             }
         });
         $('#start_queue').on('click', function () {
@@ -60,7 +87,7 @@
             console.log('socket connected!')
         };
         socket.onclose = function () {
-            alert("lost connect!");
+            BootstrapDialog.show({message: "lost connect!"});
         };
         socket.onmessage = function (command) {
             var msg = JSON.parse(command.data);
@@ -84,7 +111,7 @@
                         }));
                         break;
                     case 'start':
-                        chessBoard.changeColor(msg.data.color);
+                        chessBoard.changeColor(msg.data);
                         chessBoard.changeState(chessBoardStates.startStates);
                         break;
                     case 'underPawn':
@@ -99,28 +126,32 @@
                         chessBoard.changeState(chessBoardStates.waitStates);
                         break;
                     case 'responseRegret':
-                        if(msg.data.result){
+                        if (msg.data.result) {
                             chessBoard.synchronized(msg.data.boardState);
                             chessBoard.changeState(chessBoardStates.playStates)
-                            alert("对手同意悔棋！");
-                        }else{
-                            alert("对手不同意悔棋！");
+                            BootstrapDialog.show({message: "对手同意悔棋！"});
+                        } else {
+                            BootstrapDialog.show({message: "对手不同意悔棋！"});
                         }
                         break;
                     case 'chat':
-                        alert(msg.data);
+                        BootstrapDialog.show({message: msg.data});
                         break;
                     case 'win':
                         chessBoard.changeState(chessBoardStates.waitStates);
-                        alert("you win!");
+                        BootstrapDialog.show({message: '恭喜你获得胜利!'});
                         break;
                     case 'loss':
                         chessBoard.changeState(chessBoardStates.waitStates);
-                        alert("you loss!");
+                        BootstrapDialog.show({message: "你输了，再接再厉!"});
                         break;
                     case 'giveUp':
                         chessBoard.changeState(chessBoardStates.waitStates);
-                        alert("opponent give up, you win!");
+                        BootstrapDialog.show({message: "你的对手认输了, 你赢了!"});
+                        break;
+                    case 'lostOpponent':
+                        chessBoard.changeState(chessBoardStates.stopStates);
+                        BootstrapDialog.show({message: "你的对手离开了游戏!"});
                         break;
                 }
             }
