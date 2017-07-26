@@ -20,6 +20,4 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ApplicationContext {
 
     public static Map<String, Player> allOnlinePlayer = new ConcurrentHashMap<>();
-
-    public static List<Player> waitQueue = new LinkedList<>();
 }

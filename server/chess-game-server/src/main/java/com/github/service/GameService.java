@@ -48,14 +48,10 @@ public class GameService implements WebSocketObserver {
         gameInfoMap.put(player1.getId(), gameInfo);
         gameInfoMap.put(player2.getId(), gameInfo);
         try {
-            Map<String, Object> data = new HashMap<>();
-            data.put("opponent", player1.getOpponent().getName());
-            data.put("color", player1.getColor());
-            Message message = new Message(topic, "prepareGame", data);
+            Message message = new Message(topic, "prepareGame", player1.getOpponent().getName());
             player1.sendMessage(message.toTextMessage());
             //noinspection unchecked
-            data.put("opponent", player2.getOpponent().getName());
-            data.put("color", player2.getColor());
+            message.setData(player2.getOpponent().getName());
             player2.sendMessage(message.toTextMessage());
         } catch (IOException e) {
             this.afterException(player1, player2, e);
@@ -68,11 +64,13 @@ public class GameService implements WebSocketObserver {
         Player opponent = player.getOpponent();
         if (opponent.isReady()) {
             GameInfo gameInfo = gameInfoMap.get(player.getId());
-            TextMessage textMessage = new Message(topic, "start").toTextMessage();
+            Message message = new Message(topic, "start");
             gameInfo.setCurrentUnderPawnId(player.getColor() == Constants.COLOR_BLACK ? player.getId() : opponent.getId());
             try {
-                player.sendMessage(textMessage);
-                opponent.sendMessage(textMessage);
+                message.setData(player.getColor());
+                player.sendMessage(message);
+                message.setData(opponent.getColor());
+                opponent.sendMessage(message);
             } catch (IOException e) {
                 this.afterException(player, e);
             }
@@ -83,11 +81,8 @@ public class GameService implements WebSocketObserver {
     public void underPawn(Player player, Point point) {
         GameInfo gameInfo = gameInfoMap.get(player.getId());
         Assert.isTrue(player.getId().equals(gameInfo.getCurrentUnderPawnId()), "wrong states!");
-        gameInfo.setCurrentUnderPawnId(player.getOpponent().getId());
-        int[][] chesses = gameInfo.getChesses();
-        Assert.isTrue(point.x <= chesses.length || point.y <= chesses.length, "wrong point!");
-        chesses[point.x][point.y] = player.getColor();
-        boolean winFlag = this.isWin(chesses, point);
+        gameInfo.backUp();
+        boolean winFlag = gameInfo.underPawn(point, player.getColor());
         Player opponent = player.getOpponent();
         try {
             opponent.sendMessage(topic, "underPawn", point);
@@ -107,17 +102,42 @@ public class GameService implements WebSocketObserver {
 
     @WebSocketMapping("chat")
     public void chat(Player player, String message) {
-
+        Player opponent = player.getOpponent();
+        try {
+            opponent.sendMessage(topic, "chat", message);
+        } catch (IOException e) {
+            this.afterException(player, opponent, e);
+        }
     }
 
     @WebSocketMapping("requestRegret")
     public void requestRegret(Player player) {
-
+        GameInfo gameInfo = gameInfoMap.get(player.getId());
+        Assert.isTrue(!gameInfo.getCurrentUnderPawnId().equals(player.getId()), "wrong state!");
+        Player opponent = player.getOpponent();
+        try {
+            opponent.sendMessage(topic, "requestRegret");
+        } catch (IOException e) {
+            this.afterException(player, opponent, e);
+        }
     }
 
     @WebSocketMapping("responseRegret")
-    public void responseRegret(Player player) {
-
+    public void responseRegret(Player player, boolean agree) {
+        GameInfo gameInfo = gameInfoMap.get(player.getId());
+        Player opponent = player.getOpponent();
+        try {
+            Map<String, Object> data = new HashMap<>();
+            data.put("result", agree);
+            if (agree) {
+                GameInfo.BoardState boardState = gameInfo.recover();
+                data.put("boardState", boardState);
+                player.sendMessage(topic, "regretSynchronized", boardState);
+            }
+            opponent.sendMessage(topic, "responseRegret", data);
+        } catch (IOException e) {
+            this.afterException(player, opponent, e);
+        }
     }
 
     @WebSocketMapping("giveUp")
@@ -131,88 +151,6 @@ public class GameService implements WebSocketObserver {
             opponent.sendMessage(topic, "giveUp");
         } catch (IOException e) {
             this.afterException(player, opponent, e);
-        }
-    }
-
-    private boolean isWin(int[][] chesses, Point p) {
-        int lastColor = chesses[p.x][p.y];
-        int length = chesses.length;
-        int num = 0;
-        int temp = 0;
-        Point minPoint = new Point((temp = p.x - 4) > 0 ? temp : 0, (temp = p.y - 4) > 0 ? temp : 0);
-        Point maxPoint = new Point((temp = p.x + 4) > length ? length : temp,
-                (temp = p.y + 4) > length ? length : temp);
-        for (int x = minPoint.x; x <= maxPoint.x; x++) {
-            if (chesses[x][p.y] == lastColor) {
-                num++;
-                if (num == 5) {
-                    return true;
-                }
-            } else {
-                num = 0;
-            }
-        }
-        num = 0;
-        for (int y = minPoint.y; y <= maxPoint.y; y++) {
-            if (chesses[p.x][y] == lastColor) {
-                num++;
-                if (num == 5) {
-                    return true;
-                }
-            } else {
-                num = 0;
-            }
-        }
-        minPoint = new Point(p.x - 4, p.y - 4);
-        if (minPoint.x < 0 || minPoint.y < 0) {
-            temp = minPoint.x < minPoint.y ? 0 - minPoint.x : 0 - maxPoint.y;
-            minPoint.x = minPoint.x + temp;
-            minPoint.y = minPoint.y + temp;
-        }
-        maxPoint = new Point(p.x + 4, p.y + 4);
-        if (maxPoint.x > length || maxPoint.y > length) {
-            temp = maxPoint.x > maxPoint.y ? maxPoint.x - length : maxPoint.y - length;
-            minPoint.x = minPoint.x - temp;
-            minPoint.y = minPoint.y - temp;
-        }
-        num = 0;
-        for (int x = minPoint.x, y = minPoint.y; x <= maxPoint.x; x = ++y) {
-            if (chesses[x][y] == lastColor) {
-                num++;
-                if (num == 5) {
-                    return true;
-                }
-            } else {
-                num = 0;
-            }
-        }
-        num = 0;
-        for (int x = minPoint.x, y = maxPoint.y; x <= maxPoint.x; x++, y--) {
-            if (chesses[x][y] == lastColor) {
-                num++;
-                if (num == 5) {
-                    return true;
-                }
-            } else {
-                num = 0;
-            }
-        }
-        return false;
-    }
-
-    public void respondConnectionClosed(WebSocketSession session) {
-        GameInfo gameInfo;
-        if ((gameInfo = gameInfoMap.get(session.getId())) != null) {
-            Player lostPlayer = gameInfo.getPlayer(session);
-            Player opponent = lostPlayer.getOpponent();
-            opponent.reset();
-            try {
-                opponent.sendMessage(new Message(topic, "lostOpponent", null).toTextMessage());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            gameInfoMap.remove(lostPlayer.getId());
-            gameInfoMap.remove(opponent.getId());
         }
     }
 
@@ -233,6 +171,23 @@ public class GameService implements WebSocketObserver {
             gameInfoMap.remove(player1.getId());
             gameInfoMap.remove(player2.getId());
             logger.error("game service has error!", e);
+        }
+    }
+
+    @Override
+    public void respondConnectionClosed(WebSocketSession session) {
+        GameInfo gameInfo;
+        if ((gameInfo = gameInfoMap.get(session.getId())) != null) {
+            Player lostPlayer = gameInfo.getPlayer(session);
+            Player opponent = lostPlayer.getOpponent();
+            opponent.reset();
+            try {
+                opponent.sendMessage(new Message(topic, "lostOpponent", null).toTextMessage());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            gameInfoMap.remove(lostPlayer.getId());
+            gameInfoMap.remove(opponent.getId());
         }
     }
 

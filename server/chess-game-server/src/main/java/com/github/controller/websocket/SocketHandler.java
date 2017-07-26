@@ -6,6 +6,7 @@ import com.github.observer.WebSocketObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.Assert;
@@ -24,17 +25,14 @@ import java.util.List;
  * Time 2017/7/12.
  * Version v1.0
  */
-public class SocketHandler extends TextWebSocketHandler implements ApplicationContextAware {
+public class SocketHandler extends TextWebSocketHandler {
 
-    private ApplicationContext applicationContext;
-
-    private List<WebSocketObserver> webSocketObservers;
+    private List<WebSocketObserver> webSocketObservers = new ArrayList<>();
 
     private final Logger logger = LoggerFactory.getLogger(SocketHandler.class);
 
-    public SocketHandler() {
-        this.webSocketObservers = new ArrayList<>();
-    }
+    @Autowired
+    private WebSocketRequestDispatch webSocketRequestDispatch;
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage textMessage) throws Exception {
@@ -43,7 +41,7 @@ public class SocketHandler extends TextWebSocketHandler implements ApplicationCo
         String topic = jsonData.getString("topic");
         String tag = jsonData.getString("tag");
         Assert.isTrue(StringUtils.hasText(topic) && StringUtils.hasText(tag), "un support request");
-        applicationContext.getBean(WebSocketRequestDispatch.class).doDispatch(session, topic, tag, jsonData.get("data"));
+        webSocketRequestDispatch.doDispatch(session, topic, tag, jsonData.get("data"));
     }
 
     @Override
@@ -66,8 +64,4 @@ public class SocketHandler extends TextWebSocketHandler implements ApplicationCo
         this.webSocketObservers.add(webSocketObserver);
     }
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-    }
 }

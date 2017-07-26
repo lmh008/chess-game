@@ -194,6 +194,10 @@ function ChessBoard() {
             _this.currentState = state.name;
             return _this.changeState.apply(_this, arguments);
         },
+        synchronized: function (boardState) {
+            _this.lastChessPicePoint = boardState.lastPoint;
+            _this.chesses = boardState.chesses;
+        },
         accept: function (visitor) {
             visitor && 'visitChessBoard' in visitor && typeof visitor.visitChessBoard === 'function' && visitor.visitChessBoard(_this);
         }

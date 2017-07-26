@@ -3,22 +3,18 @@
  */
 (function Game() {
 
-    var chessBoard = null;
+    var chessBoard = new ChessBoard();
     var _this = this;
     var socket = null;
-    var $div_name_input = null;
-    var $div_game = null;
-    var $div_wait_queue = null;
-    var $wait_queue_label = null;
+    var $div_name_input = $('#div_name_input');
+    var $div_wait_queue = $('#div_wait_queue');
+    var $div_game = $('#div_game');
+    var $wait_queue_label = $('#wait_queue_label');
+    var player = {};
 
     var start = function () {
-        $div_name_input = $('#div_name_input');
-        $div_wait_queue = $('#div_wait_queue');
-        $div_game = $('#div_game');
-        $wait_queue_label = $('#wait_queue_label');
         initSocket();
         intiEvent();
-        chessBoard = new ChessBoard();
         chessBoard.bindOnUnderPawn(function (point) {
             socket.send(JSON.stringify({
                 topic: 'game',
@@ -38,6 +34,7 @@
     var intiEvent = function () {
         $('#bt_confirm').on('click', function () {
             var nameInput = $('#name').val();
+            player.name = nameInput;
             if (nameInput) {
                 socket.send(JSON.stringify({
                     topic: 'base',
@@ -80,7 +77,6 @@
                     case 'prepareGame':
                         $div_wait_queue.hide();
                         $div_game.show();
-                        chessBoard.changeColor(msg.data.color);
                         chessBoard.changeState(chessBoardStates.initStates);
                         socket.send(JSON.stringify({
                             topic: 'game',
@@ -88,6 +84,7 @@
                         }));
                         break;
                     case 'start':
+                        chessBoard.changeColor(msg.data.color);
                         chessBoard.changeState(chessBoardStates.startStates);
                         break;
                     case 'underPawn':
@@ -96,6 +93,22 @@
                             y: msg.data.y
                         });
                         chessBoard.changeState(chessBoardStates.playStates);
+                        break;
+                    case 'regretSynchronized':
+                        chessBoard.synchronized(msg.data);
+                        chessBoard.changeState(chessBoardStates.waitStates);
+                        break;
+                    case 'responseRegret':
+                        if(msg.data.result){
+                            chessBoard.synchronized(msg.data.boardState);
+                            chessBoard.changeState(chessBoardStates.playStates)
+                            alert("对手同意悔棋！");
+                        }else{
+                            alert("对手不同意悔棋！");
+                        }
+                        break;
+                    case 'chat':
+                        alert(msg.data);
                         break;
                     case 'win':
                         chessBoard.changeState(chessBoardStates.waitStates);
