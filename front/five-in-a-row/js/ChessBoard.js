@@ -24,10 +24,12 @@ function ChessBoard() {
         this.container = document.getElementById('game_chess_board');
         this.lengthOfSide = this.container.clientWidth * 0.8;
         this.gap = this.lengthOfSide / 24;
-        this.boardCanvas = document.createElement('canvas');
+        if (!this.boardCanvas) {
+            this.boardCanvas = document.createElement('canvas');
+            this.container.insertBefore(this.boardCanvas, document.getElementById('div_button_group'));
+        }
         this.boardCanvas.width = this.lengthOfSide + this.margin * 2;
         this.boardCanvas.height = this.lengthOfSide + this.margin * 2;
-        this.container.appendChild(this.boardCanvas);
         this.boardCtx = this.boardCanvas.getContext("2d");
     };
 

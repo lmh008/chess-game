@@ -8,6 +8,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.lang.reflect.InvocationTargetException;
@@ -15,6 +16,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Title
@@ -44,7 +46,7 @@ public class WebSocketRequestDispatch implements ApplicationContextAware {
      * 初始化请求映射
      */
     private void initRegisterMapping() {
-        registerMapping = new HashMap<>();
+        registerMapping = new ConcurrentHashMap<>();
         Map<String, Object> map = this.applicationContext.getBeansWithAnnotation(WebSocketMapping.class);
         String basePath;
         WebSocketMapping webSocketMapping;
@@ -85,16 +87,21 @@ public class WebSocketRequestDispatch implements ApplicationContextAware {
      * @throws InvocationTargetException
      * @throws IllegalAccessException
      */
-    public void doDispatch(WebSocketSession session, String topic, String tag, Object data) throws InvocationTargetException, IllegalAccessException {
+    public void doDispatch(WebSocketSession session, String topic, String tag, Object data) throws Exception {
         Map<String, RequestHandlerMapping> topicMappingMap = this.registerMapping.get(topic);
         if (topicMappingMap != null) {
             RequestHandlerMapping tagHandlerMapping = topicMappingMap.get(tag);
             if (tagHandlerMapping != null) {
-                Object handlerBean = this.applicationContext.getBean(tagHandlerMapping.getRegisterBeanType());
-                Object[] params = this.autoWiredParams(tagHandlerMapping.getRegisterMethod(), session, data);
-                tagHandlerMapping.getRegisterMethod().invoke(handlerBean, params);
+                try {
+                    Object handlerBean = this.applicationContext.getBean(tagHandlerMapping.getRegisterBeanType());
+                    Assert.notNull(handlerBean, "type:" + tagHandlerMapping.getRegisterBeanType());
+                    Object[] params = this.autoWiredParams(tagHandlerMapping.getRegisterMethod(), session, data);
+                    tagHandlerMapping.getRegisterMethod().invoke(handlerBean, params);
+                } catch (Throwable e) {
+                    throw new Exception("invoke error, tag: " + tag + "for topic:" + topic + " params : " + data, e);
+                }
             } else {
-                throw new IllegalAccessException("can not find mapping tag for topic:" + topic);
+                throw new IllegalAccessException("can not find mapping tag: " + tag + "for topic:" + topic);
             }
         } else {
             throw new IllegalAccessException("can not find mapping topic");

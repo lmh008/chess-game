@@ -66,7 +66,6 @@ public class GameService implements WebSocketObserver {
             if (opponent.isReady()) {
                 GameInfo gameInfo = gameInfoMap.get(player.getId());
                 Message message = new Message(topic, "start");
-                gameInfo.setCurrentUnderPawnId(player.getColor() == Constants.COLOR_BLACK ? player.getId() : opponent.getId());
                 message.setData(player);
                 player.sendMessage(message);
                 message.setData(opponent);
@@ -132,6 +131,7 @@ public class GameService implements WebSocketObserver {
             Map<String, Object> data = new HashMap<>();
             data.put("result", agree);
             if (agree) {
+                gameInfo.setCurrentUnderPawnId(opponent.getId());
                 GameInfo.BoardState boardState = gameInfo.recover();
                 data.put("boardState", boardState);
                 player.sendMessage(topic, "regretSynchronized", boardState);
@@ -154,6 +154,11 @@ public class GameService implements WebSocketObserver {
         } catch (IOException e) {
             this.afterException(player, opponent, e);
         }
+    }
+
+    @WebSocketMapping("quit")
+    public void quit(WebSocketSession socketSession) {
+        this.respondConnectionClosed(socketSession);
     }
 
     private void afterException(Player player, Exception e) {

@@ -67,7 +67,9 @@ public class Player {
     }
 
     public void sendMessage(TextMessage textMessage) throws IOException {
-        this.webSocketSession.sendMessage(textMessage);
+        synchronized (webSocketSession) {
+            webSocketSession.sendMessage(textMessage);
+        }
     }
 
     public void reset() {

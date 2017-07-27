@@ -6,7 +6,9 @@ function Game(ops) {
         ready: null,
         onUnderPawn: null,
         requestRegret: null,
-        chat: null
+        responseRegret: null,
+        chat: null,
+        giveUp: null
     }, ops || {});
     var player = {
         name: 'someBody',
@@ -23,6 +25,11 @@ function Game(ops) {
     var $div_my_info = $("#div_my_info");
     var $div_opponent_info = $("#div_opponent_info");
     var $textarea_chat_info = $("#textarea_chat_info");
+    var $game_chess_board = $('#game_chess_board');
+    var $bt_ready = $('#bt_ready');
+    var $bt_regret = $('#bt_regret');
+    var $bt_give_up = $('#bt_give_up');
+    var $bt_quit = $('#bt_quit');
     var canvas_my = $("#canvas_my").get(0);
     var canvas_opponent = $("#canvas_opponent").get(0);
     var myCanvasContext = canvas_my.getContext("2d");
@@ -36,9 +43,9 @@ function Game(ops) {
     });
 
     var intiUi = function () {
-        $textarea_chat_info.height(chessBoard.width() - 100);
-        $div_my_info.height(chessBoard.width() / 2);
-        $div_opponent_info.height(chessBoard.width() / 2);
+        $textarea_chat_info.height($game_chess_board.height() * 0.82);
+        $div_my_info.height($game_chess_board.width() * 0.43);
+        $div_opponent_info.height($game_chess_board.width() * 0.43);
         canvas_my.width = $div_my_info.find(".panel-body").width();
         canvas_my.height = $div_my_info.find(".panel-body").height();
         canvas_opponent.width = $div_opponent_info.find(".panel-body").width();
@@ -60,6 +67,30 @@ function Game(ops) {
                     chatInfoAppend(player.name + ' ：' + text, true);
                 }
             }
+        });
+        $bt_ready.unbind('click').on('click', function (event) {
+            option.ready && $.isFunction(option.ready) && option.ready.call(this);
+            $(this).attr('disabled', true);
+        });
+        $bt_give_up.unbind('click').on('click', function () {
+            BootstrapDialog.confirm('确认投降吗？', function (result) {
+                if (result) {
+                    option.giveUp && $.isFunction(option.giveUp) && option.giveUp.call(this);
+                    chessBoard.changeState(chessBoardStates.stopStates);
+                }
+            });
+        });
+        $bt_quit.unbind('click').on('click', function () {
+            BootstrapDialog.confirm('确定要离开吗？', function (result) {
+                if (result) {
+                    chessBoard.changeState(chessBoardStates.stopStates);
+                    option.quit && $.isFunction(option.quit) && option.quit.call(this);
+                }
+            });
+        });
+        $bt_regret.unbind('click').on('click', function () {
+            option.requestRegret && $.isFunction(option.requestRegret) && option.requestRegret.call(this);
+            BootstrapDialog.show({message: '正在征询' + player.opponent.name + '同意!'});
         });
     };
 
@@ -135,7 +166,6 @@ function Game(ops) {
             intiUi();
             bindEvent();
             synchronizedPlayers(player);
-            option.ready && $.isFunction(option.ready) && option.ready.call(this);
         },
         opponentReady: function (data) {
             //todo
@@ -156,7 +186,7 @@ function Game(ops) {
         },
         requestRegret: function (data) {
             BootstrapDialog.confirm(player.opponent.name + '请求悔棋, 是否同意?', function (result) {
-                option.requestRegret && $.isFunction(option.requestRegret) && option.requestRegret.call(this, result);
+                option.responseRegret && $.isFunction(option.responseRegret) && option.responseRegret.call(this, result);
             });
         },
         regretSynchronized: function (data) {
@@ -190,6 +220,8 @@ function Game(ops) {
         lostOpponent: function (data) {
             chessBoard.changeState(chessBoardStates.stopStates);
             BootstrapDialog.show({message: player.opponent.name + "离开了游戏!"});
+            flashFlag = 0;
+            option.quit && $.isFunction(option.quit) && option.quit.call(this);
         }
     }
 }

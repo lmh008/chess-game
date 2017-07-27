@@ -7,6 +7,9 @@
 var InitState = function () {
     this.name = 'init';
     this.doState = function (chessBoard) {
+        $('#bt_ready').removeAttr('disabled');
+        $('#bt_regret').attr('disabled', true);
+        $('#bt_give_up').attr('disabled', true);
         chessBoard.initElement();
         chessBoard.drawBoard();
     };
@@ -36,6 +39,9 @@ var WaitStates = function () {
     this.name = 'wait';
     this.doState = function (chessBoard) {
         chessBoard.unBindEvent();
+        $('#bt_ready').attr('disabled', true);
+        $('#bt_regret').removeAttr('disabled');
+        $('#bt_give_up').removeAttr('disabled');
     }
 };
 
@@ -46,6 +52,9 @@ var PlayStates = function () {
 
     this.doState = function (chessBoard) {
         chessBoard.bindEvent();
+        $('#bt_ready').attr('disabled', true);
+        $('#bt_regret').attr('disabled', true);
+        $('#bt_give_up').removeAttr('disabled');
     };
 };
 
@@ -55,6 +64,9 @@ var StopStates = function () {
     this.doState = function (chessBoard) {
         chessBoard.unBindEvent();
         chessBoard.reset();
+        $('#bt_ready').removeAttr('disabled');
+        $('#bt_regret').attr('disabled', true);
+        $('#bt_give_up').removeAttr('disabled');
     }
 };
 
@@ -63,6 +75,6 @@ var chessBoardStates = {
     startStates: new StartStates(),
     waitStates: new WaitStates(),
     playStates: new PlayStates(),
-    stopStates: new StopStates(),
+    stopStates: new StopStates()
 };
 

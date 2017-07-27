@@ -12,6 +12,8 @@ $(function () {
     var game = new Game({
         socket: socket,
         quit: function () {
+            sendMessage('game', 'quit');
+            $('#start_queue').show();
             showWait();
         },
         ready: function () {
@@ -23,11 +25,17 @@ $(function () {
                 y: point.y
             });
         },
-        requestRegret: function (result) {
+        requestRegret: function () {
+            sendMessage('game', 'requestRegret');
+        },
+        responseRegret: function (result) {
             sendMessage('game', 'responseRegret', !!result);
         },
         chat: function (message) {
             sendMessage('game', 'chat', message);
+        },
+        giveUp: function () {
+            sendMessage('game', 'giveUp');
         }
     });
 

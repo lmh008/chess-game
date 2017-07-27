@@ -4,6 +4,9 @@ import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.awt.*;
+import java.util.LinkedList;
+import java.util.List;
+
 
 /**
  * Title
@@ -15,7 +18,7 @@ public class GameInfo {
 
     private BoardState boardState = new BoardState();
 
-    private BoardState boardStateBack = new BoardState();
+    private LinkedList<BoardState> boardStateBacks = new LinkedList<>();
 
     private Player player1;
 
@@ -25,6 +28,7 @@ public class GameInfo {
         Assert.isTrue(player1 != null && player2 != null, "can not null!");
         this.player1 = player1;
         this.player2 = player2;
+        this.boardState.currentUnderPawnId = player1.getColor() == Constants.COLOR_BLACK ? player1.getId() : player2.getId();
     }
 
     public int[][] getChesses() {
@@ -36,12 +40,13 @@ public class GameInfo {
     }
 
     public void renew() {
-        boardState = new BoardState();
-        boardStateBack = new BoardState();
         player1.changeColor();
         player2.changeColor();
         player1.setReady(false);
         player2.setReady(false);
+        boardState = new BoardState();
+        this.boardState.currentUnderPawnId = player1.getColor() == Constants.COLOR_BLACK ? player1.getId() : player2.getId();
+        boardStateBacks.clear();
     }
 
     public boolean underPawn(Point point, int color) {
@@ -140,15 +145,14 @@ public class GameInfo {
     }
 
     public BoardState recover() {
-        this.boardState = this.boardStateBack;
+        if (boardStateBacks.size() > 0) {
+            this.boardState = boardStateBacks.size() == 1 ? boardStateBacks.get(0) : boardStateBacks.removeLast();
+        }
         return this.boardState;
     }
 
     public void backUp() {
-        for (int i = 0; i < this.boardState.chesses.length; i++) {
-            System.arraycopy(this.boardState.chesses[i], 0, this.boardStateBack.chesses[i], 0, this.boardStateBack.chesses[i].length);
-        }
-        this.boardStateBack.lastPoint = this.boardState.lastPoint;
+        this.boardStateBacks.add(this.boardState.backUp());
     }
 
     public class BoardState {
@@ -156,6 +160,23 @@ public class GameInfo {
         private int[][] chesses = new int[25][25];
         private Point lastPoint;
         private String currentUnderPawnId;
+
+        BoardState() {
+        }
+
+        BoardState(int[][] chesses, Point lastPoint, String currentUnderPawnId) {
+            this.chesses = chesses;
+            this.lastPoint = lastPoint;
+            this.currentUnderPawnId = currentUnderPawnId;
+        }
+
+        BoardState backUp() {
+            int[][] backChesses = new int[25][25];
+            for (int i = 0; i < this.chesses.length; i++) {
+                System.arraycopy(this.chesses[i], 0, backChesses[i], 0, this.chesses[i].length);
+            }
+            return new BoardState(backChesses, this.lastPoint, this.currentUnderPawnId);
+        }
 
         public int[][] getChesses() {
             return chesses;
