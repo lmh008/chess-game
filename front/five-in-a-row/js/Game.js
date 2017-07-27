@@ -1,162 +1,195 @@
-/**
- * Created by Administrator on 2017/7/8.
- */
-(function Game() {
+function Game(ops) {
 
     var chessBoard = new ChessBoard();
-    var _this = this;
-    var socket = null;
-    var $div_name_input = $('#div_name_input');
-    var $div_wait_queue = $('#div_wait_queue');
-    var $div_game = $('#div_game');
-    var $wait_queue_label = $('#wait_queue_label');
-    var player = {};
+    var option = $.extend({
+        quit: null,
+        ready: null,
+        onUnderPawn: null,
+        requestRegret: null,
+        chat: null
+    }, ops || {});
+    var player = {
+        name: 'someBody',
+        color: ChessPieces.black,
+        winCount: 0,
+        lossCount: 0,
+        opponent: {
+            name: 'opponent',
+            color: ChessPieces.white,
+            winCount: 0,
+            lossCount: 0
+        }
+    };
+    var $div_my_info = $("#div_my_info");
+    var $div_opponent_info = $("#div_opponent_info");
+    var $textarea_chat_info = $("#textarea_chat_info");
+    var canvas_my = $("#canvas_my").get(0);
+    var canvas_opponent = $("#canvas_opponent").get(0);
+    var myCanvasContext = canvas_my.getContext("2d");
+    var opponentCanvasContext = canvas_opponent.getContext("2d");
+    var r;
+    var flashFlag = 0;
 
-    var start = function () {
-        initSocket();
-        intiEvent();
-        chessBoard.bindOnUnderPawn(function (point) {
-            socket.send(JSON.stringify({
-                topic: 'game',
-                tag: 'underPawn',
-                data: {
-                    x: point.x,
-                    y: point.y
-                }
-            }));
-            chessBoard.changeState(chessBoardStates.waitStates);
-        });
-        $div_game.show();
-        $div_name_input.hide();
-        chessBoard.changeState(chessBoardStates.initStates);
-        $("#textarea_chat_info").height(chessBoard.width() - 100);
-        var $div_my_info = $("#div_my_info");
-        var $div_opponent_info = $("#div_opponent_info");
+    chessBoard.bindOnUnderPawn(function (point) {
+        option.onUnderPawn && $.isFunction(option.onUnderPawn) && option.onUnderPawn.call(this, point);
+        opponentTurn();
+    });
+
+    var intiUi = function () {
+        $textarea_chat_info.height(chessBoard.width() - 100);
         $div_my_info.height(chessBoard.width() / 2);
         $div_opponent_info.height(chessBoard.width() / 2);
-        var canvas_my = $("#canvas_my").get(0);
-        var canvas_opponent = $("#canvas_opponent").get(0);
         canvas_my.width = $div_my_info.find(".panel-body").width();
         canvas_my.height = $div_my_info.find(".panel-body").height();
         canvas_opponent.width = $div_opponent_info.find(".panel-body").width();
         canvas_opponent.height = $div_opponent_info.find(".panel-body").height();
-        var r = canvas_my.height >= canvas_my.width ? canvas_my.width / 2 - 20 : canvas_my.height / 2 - 20;
-        var myCanvasContext = canvas_my.getContext("2d");
-        myCanvasContext.beginPath();
-        myCanvasContext.fillStyle = 'black';
-        myCanvasContext.arc(canvas_my.width / 2, canvas_my.height / 2, r, 0, 2 * Math.PI);
-        myCanvasContext.fill();
-        myCanvasContext.closePath();
-        var opponentCanvasContext = canvas_opponent.getContext("2d");
+        r = canvas_my.height >= canvas_my.width ? canvas_my.width / 2 - 20 : canvas_my.height / 2 - 20;
+        drawMyPieces();
+        drawOpponentPieces();
+        drawPieces();
+    };
+
+    var bindEvent = function () {
+        $("#input_chat_content").on("keydown", function (event) {
+            if (event.keyCode === 13) {
+                var $this = $(event.currentTarget);
+                var text = $this.val();
+                if (text && option.chat && $.isFunction(option.chat)) {
+                    option.chat.call(this, text);
+                    $this.val('');
+                    chatInfoAppend(player.name + ' ：' + text, true);
+                }
+            }
+        });
+    };
+
+    var chatInfoAppend = function (text, type) {
+        /*var oFont = document.createElement("FONT");
+        var oText = document.createTextNode(text + '\r');
+        oFont.style.color = type ? "#beffca" : "#1526ff";
+        $textarea_chat_info.get(0).appendChild(oFont);
+        oFont.appendChild(oText);*/
+        $textarea_chat_info.append(text + "\r\n");
+    };
+
+    var drawOpponentPieces = function () {
         opponentCanvasContext.beginPath();
-        opponentCanvasContext.fillStyle = 'black';
+        opponentCanvasContext.fillStyle = player.opponent.color == ChessPieces.black ? 'black' : 'white';
         opponentCanvasContext.arc(canvas_opponent.width / 2, canvas_opponent.height / 2, r, 0, 2 * Math.PI);
         opponentCanvasContext.fill();
         opponentCanvasContext.closePath();
-
     };
 
-    var intiEvent = function () {
-        $('#bt_confirm').on('click', function () {
-            var nameInput = $('#name').val();
-            player.name = nameInput;
-            if (nameInput) {
-                socket.send(JSON.stringify({
-                    topic: 'base',
-                    tag: 'setName',
-                    data: nameInput
-                }));
-                $div_name_input.hide();
-                $div_wait_queue.show();
+    var drawMyPieces = function () {
+        myCanvasContext.beginPath();
+        myCanvasContext.fillStyle = player.color == ChessPieces.black ? 'black' : 'white';
+        myCanvasContext.arc(canvas_my.width / 2, canvas_my.height / 2, r, 0, 2 * Math.PI);
+        myCanvasContext.fill();
+        myCanvasContext.closePath();
+    };
+
+    var drawPieces = function () {
+        var flashCount = 1;
+        var draw = function () {
+            if (flashFlag === 1) {
+                myCanvasContext.clearRect(0, 0, canvas_my.width, canvas_my.height);
+                flashCount % 2 === 0 && drawMyPieces();
+            } else if (flashFlag === -1) {
+                opponentCanvasContext.clearRect(0, 0, canvas_opponent.width, canvas_opponent.height);
+                flashCount % 2 === 0 && drawOpponentPieces();
+            }
+            flashCount >= 1000 && (flashCount = 0);
+            flashCount++;
+            setTimeout(function () {
+                draw();
+            }, 400);
+        };
+        draw();
+    };
+
+    var synchronizedPlayers = function (player) {
+        var text = "比分：胜" + player.winCount + " 负" + player.lossCount;
+        $div_my_info.find("#div_my_score").html(text);
+        text = "比分：胜" + player.opponent.winCount + " 负" + player.opponent.lossCount;
+        $div_opponent_info.find("#div_opponent_score").html(text);
+        $div_my_info.find(".panel-title").html(player.name);
+        $div_opponent_info.find(".panel-title").html(player.opponent.name);
+    };
+
+    var myTurn = function () {
+        chessBoard.changeState(chessBoardStates.playStates);
+        flashFlag = 1;
+    };
+
+    var opponentTurn = function () {
+        chessBoard.changeState(chessBoardStates.waitStates);
+        flashFlag = -1;
+    };
+
+    return {
+        load: function (data) {
+            console.log(data);
+            $.extend(player, data);
+            chessBoard.changeColor(player.color);
+            chessBoard.changeState(chessBoardStates.initStates);
+            intiUi();
+            bindEvent();
+            synchronizedPlayers(player);
+            option.ready && $.isFunction(option.ready) && option.ready.call(this);
+        },
+        opponentReady: function (data) {
+            //todo
+        },
+        start: function (data) {
+            $.extend(player, data);
+            chessBoard.changeColor(player.color);
+            flashFlag = player.color == ChessPieces.black ? 1 : -1;
+            chessBoard.changeState(chessBoardStates.startStates);
+            synchronizedPlayers(player);
+        },
+        underPawn: function (data) {
+            chessBoard.addOppoChess({
+                x: data.x,
+                y: data.y
+            });
+            myTurn();
+        },
+        requestRegret: function (data) {
+            BootstrapDialog.confirm(player.opponent.name + '请求悔棋, 是否同意?', function (result) {
+                option.requestRegret && $.isFunction(option.requestRegret) && option.requestRegret.call(this, result);
+            });
+        },
+        regretSynchronized: function (data) {
+            chessBoard.synchronized(data);
+            opponentTurn();
+        },
+        responseRegret: function (data) {
+            if (data.result) {
+                chessBoard.synchronized(data.boardState);
+                myTurn();
+                BootstrapDialog.show({message: player.opponent.name + "同意悔棋！"});
             } else {
-                BootstrapDialog.show({message: '请输入一个名字！'});
+                BootstrapDialog.show({message: player.opponent.name + "不同意悔棋！"});
             }
-        });
-        $('#start_queue').on('click', function () {
-            socket.send(JSON.stringify({
-                topic: 'base',
-                tag: 'startQueue'
-            }));
-            $(this).hide();
-        });
-    };
-
-    var initSocket = function () {
-        socket = new WebSocket("ws://mrj.website:8080/five");
-        socket.onopen = function () {
-            console.log('socket connected!')
-        };
-        socket.onclose = function () {
-            BootstrapDialog.show({message: "lost connect!"});
-        };
-        socket.onmessage = function (command) {
-            var msg = JSON.parse(command.data);
-            console.log(msg);
-            if (msg.topic && msg.topic == 'base') {
-                switch (msg.tag) {
-                    case 'playerInfos':
-                        $wait_queue_label.html('共' + msg.data.online + '人在线，游戏队列人数:' + msg.data.onWait);
-                        break;
-                }
-            }
-            if (msg.topic && msg.topic == 'game') {
-                switch (msg.tag) {
-                    case 'prepareGame':
-                        $div_wait_queue.hide();
-                        $div_game.show();
-                        chessBoard.changeState(chessBoardStates.initStates);
-                        socket.send(JSON.stringify({
-                            topic: 'game',
-                            tag: 'playerReady'
-                        }));
-                        break;
-                    case 'start':
-                        chessBoard.changeColor(msg.data);
-                        chessBoard.changeState(chessBoardStates.startStates);
-                        break;
-                    case 'underPawn':
-                        chessBoard.addOppoChess({
-                            x: msg.data.x,
-                            y: msg.data.y
-                        });
-                        chessBoard.changeState(chessBoardStates.playStates);
-                        break;
-                    case 'regretSynchronized':
-                        chessBoard.synchronized(msg.data);
-                        chessBoard.changeState(chessBoardStates.waitStates);
-                        break;
-                    case 'responseRegret':
-                        if (msg.data.result) {
-                            chessBoard.synchronized(msg.data.boardState);
-                            chessBoard.changeState(chessBoardStates.playStates)
-                            BootstrapDialog.show({message: "对手同意悔棋！"});
-                        } else {
-                            BootstrapDialog.show({message: "对手不同意悔棋！"});
-                        }
-                        break;
-                    case 'chat':
-                        BootstrapDialog.show({message: msg.data});
-                        break;
-                    case 'win':
-                        chessBoard.changeState(chessBoardStates.waitStates);
-                        BootstrapDialog.show({message: '恭喜你获得胜利!'});
-                        break;
-                    case 'loss':
-                        chessBoard.changeState(chessBoardStates.waitStates);
-                        BootstrapDialog.show({message: "你输了，再接再厉!"});
-                        break;
-                    case 'giveUp':
-                        chessBoard.changeState(chessBoardStates.waitStates);
-                        BootstrapDialog.show({message: "你的对手认输了, 你赢了!"});
-                        break;
-                    case 'lostOpponent':
-                        chessBoard.changeState(chessBoardStates.stopStates);
-                        BootstrapDialog.show({message: "你的对手离开了游戏!"});
-                        break;
-                }
-            }
+        },
+        chat: function (data) {
+            chatInfoAppend(player.opponent.name + ' ：' + data);
+        },
+        win: function (data) {
+            chessBoard.changeState(chessBoardStates.stopStates);
+            BootstrapDialog.show({message: '恭喜你获得胜利!'});
+        },
+        loss: function (data) {
+            chessBoard.changeState(chessBoardStates.stopStates);
+            BootstrapDialog.show({message: "你输了，再接再厉!"});
+        },
+        giveUp: function (data) {
+            chessBoard.changeState(chessBoardStates.stopStates);
+            BootstrapDialog.show({message: player.opponent.name + "认输了, 你赢了!"});
+        },
+        lostOpponent: function (data) {
+            chessBoard.changeState(chessBoardStates.stopStates);
+            BootstrapDialog.show({message: player.opponent.name + "离开了游戏!"});
         }
-    };
-
-    start();
-})();
+    }
+}

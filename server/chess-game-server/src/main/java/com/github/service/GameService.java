@@ -48,10 +48,10 @@ public class GameService implements WebSocketObserver {
         gameInfoMap.put(player1.getId(), gameInfo);
         gameInfoMap.put(player2.getId(), gameInfo);
         try {
-            Message message = new Message(topic, "prepareGame", player1.getOpponent().getName());
+            Message message = new Message("base", "prepareGame");
+            message.setData(player1);
             player1.sendMessage(message.toTextMessage());
-            //noinspection unchecked
-            message.setData(player2.getOpponent().getName());
+            message.setData(player2);
             player2.sendMessage(message.toTextMessage());
         } catch (IOException e) {
             this.afterException(player1, player2, e);
@@ -62,18 +62,20 @@ public class GameService implements WebSocketObserver {
     public void playerReady(Player player) {
         player.setReady(true);
         Player opponent = player.getOpponent();
-        if (opponent.isReady()) {
-            GameInfo gameInfo = gameInfoMap.get(player.getId());
-            Message message = new Message(topic, "start");
-            gameInfo.setCurrentUnderPawnId(player.getColor() == Constants.COLOR_BLACK ? player.getId() : opponent.getId());
-            try {
-                message.setData(player.getColor());
+        try {
+            if (opponent.isReady()) {
+                GameInfo gameInfo = gameInfoMap.get(player.getId());
+                Message message = new Message(topic, "start");
+                gameInfo.setCurrentUnderPawnId(player.getColor() == Constants.COLOR_BLACK ? player.getId() : opponent.getId());
+                message.setData(player);
                 player.sendMessage(message);
-                message.setData(opponent.getColor());
+                message.setData(opponent);
                 opponent.sendMessage(message);
-            } catch (IOException e) {
-                this.afterException(player, e);
+            } else {
+                opponent.sendMessage(topic, "opponentReady", null);
             }
+        } catch (IOException e) {
+            this.afterException(player, e);
         }
     }
 

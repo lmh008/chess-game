@@ -1,5 +1,6 @@
 package com.github.entity;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -13,8 +14,10 @@ import java.io.IOException;
  */
 public class Player {
 
+    @JSONField(serialize = false)
     private WebSocketSession webSocketSession;
 
+    @JSONField(serialize = false)
     private String id;
 
     private String name;
@@ -25,8 +28,10 @@ public class Player {
 
     private int lossCount;
 
+    @JSONField(serialize = false)
     private boolean isReady;
 
+    @JSONField(serialize = false)
     private boolean isGaming;
 
     private Player opponent;

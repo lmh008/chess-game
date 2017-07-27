@@ -16,7 +16,7 @@ var StartStates = function () {
 
     this.name = 'start';
     this.doState = function (chessBoard) {
-        var flashCount = 0;
+        var flashCount = 1;
         var draw = function () {
             chessBoard.drawBoard();
             chessBoard.drawPieces(flashCount % 2 === 0);   //使得最后一个棋子闪烁
@@ -49,15 +49,6 @@ var PlayStates = function () {
     };
 };
 
-var ResetStates = function () {
-    this.name = 'reset';
-    this.doState = function (chessBoard) {
-        chessBoard.unBindEvent();
-        chessBoard.reset();
-        chessBoard.changeColor();
-    }
-};
-
 var StopStates = function () {
 
     this.name = 'stop';
@@ -73,6 +64,5 @@ var chessBoardStates = {
     waitStates: new WaitStates(),
     playStates: new PlayStates(),
     stopStates: new StopStates(),
-    resetStates: new ResetStates()
 };
 
